@@ -84,7 +84,39 @@ const loginUser = async (req, res) => {
 	}
 };
 
+const logoutUser = (req, res) => {
+	try {
+		const session = req.cookies[sessionKey];
+
+		if (session) {
+			User.findOne({ session })
+				.then(foundUser => {
+					if (foundUser) {
+						User.updateOne({ session }, { $unset: { session } })
+							.then(() => {
+								res.clearCookie(sessionKey);
+								return res.status(200).json({ message: "User successfully logged out" });
+							})
+							.catch(error => {
+								return res.status(400).json({ error: error.message });
+							});
+					} else {
+						return res.status(400).json({ error: "No user found with the given session id" });
+					}
+				})
+				.catch(error => {
+					return res.status(400).json({ error: error.message });
+				});
+		} else {
+			return res.status(400).json({ error: "The requested session does not exist" });
+		}
+	} catch (error) {
+		return res.status(500).json({ error: error.message });
+	}
+};
+
 module.exports = {
 	registerUser,
 	loginUser,
+	logoutUser,
 };
