@@ -1,5 +1,7 @@
 const User = require("../models/userModel");
 const bcrypt = require("bcrypt");
+const uuid = require("uuid");
+const sessionKey = "SESSION_ID";
 
 const registerUser = async (req, res) => {
 	try {
@@ -36,6 +38,53 @@ const registerUser = async (req, res) => {
 	}
 };
 
+const loginUser = async (req, res) => {
+	try {
+		if (req.body.email && req.body.password) {
+			const email = req.body.email;
+
+			User.findOne({ email })
+				.then(async foundUser => {
+					if (foundUser) {
+						const arePasswordsEqual = await bcrypt.compare(req.body.password, foundUser.password);
+
+						if (arePasswordsEqual) {
+							const session = uuid.v4(); // generate a session id
+
+							res.cookie(sessionKey, session);
+
+							User.updateOne({ email }, { $set: { session } })
+								.then(() => console.log("User session successfully updated"))
+								.catch(error => {
+									console.log(error);
+								});
+
+							const userData = {
+								email: foundUser.email,
+								session,
+								_id: foundUser._id,
+							};
+
+							return res.status(200).json(userData);
+						} else {
+							return res.status(400).json({ error: "Incorrect password" });
+						}
+					} else {
+						return res.status(400).json({ error: "No account found with the given email address" });
+					}
+				})
+				.catch(error => {
+					return res.json({ error: error.message });
+				});
+		} else {
+			return res.status(400).json({ error: "Incorrect input" });
+		}
+	} catch (error) {
+		return res.status(500).json({ error: error.message });
+	}
+};
+
 module.exports = {
 	registerUser,
+	loginUser,
 };

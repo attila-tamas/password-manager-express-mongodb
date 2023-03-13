@@ -13,6 +13,7 @@ const userSchema = new Schema(
 			type: String,
 			required: true,
 		},
+		session: String,
 	},
 	{ versionKey: false }
 );
