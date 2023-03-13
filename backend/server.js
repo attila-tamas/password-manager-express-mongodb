@@ -5,10 +5,13 @@ const mongoose = require("mongoose");
 
 const app = express();
 
+// middlewares
+app.use(express.json());
+
 // routes
-app.get("/", (req, res) => {
-	res.json({ message: "Welcome" });
-});
+const authenticationRoutes = require("./routes/authenticationRoutes");
+
+app.use(authenticationRoutes);
 
 // connect to the database
 mongoose
