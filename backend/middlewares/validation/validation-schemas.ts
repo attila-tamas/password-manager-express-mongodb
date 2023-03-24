@@ -1,8 +1,8 @@
-const User = require("../../models/user-model");
-const { body, cookie } = require("express-validator");
-const bcrypt = require("bcrypt");
+import User from "../../models/user-model";
+import { body, cookie } from "express-validator";
+import bcrypt from "bcrypt";
 
-const validateRegistration = [
+export const validateRegistration = [
 	body("username")
 		.trim()
 
@@ -51,7 +51,7 @@ const validateRegistration = [
 		.withMessage("The password must be between 8 and 32 characters long"),
 ];
 
-const validateLogin = [
+export const validateLogin = [
 	body("username")
 		.trim()
 
@@ -79,20 +79,22 @@ const validateLogin = [
 
 		.custom(async (value, { req }) => {
 			const username = req.body.username;
-			const user = await User.findOne({
-				username,
-			});
+			const user = await User.findOne({ username });
 
-			const arePasswordsEqual = await bcrypt.compare(value, user.password);
-			if (!arePasswordsEqual) {
-				throw new Error("Incorrect password");
+			if (user) {
+				const arePasswordsEqual = await bcrypt.compare(value, user.password);
+				if (!arePasswordsEqual) {
+					throw new Error("Incorrect password");
+				}
+			} else {
+				throw new Error("User not found");
 			}
 
 			return true;
 		}),
 ];
 
-const validateSession = [
+export const validateSession = [
 	cookie("SESSION_ID")
 		.notEmpty()
 		.withMessage("The requested session does not exist")
@@ -110,9 +112,3 @@ const validateSession = [
 			return true;
 		}),
 ];
-
-module.exports = {
-	validateRegistration,
-	validateLogin,
-	validateSession,
-};

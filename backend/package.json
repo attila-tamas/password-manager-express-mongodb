@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "tsnd --respawn server.ts"
   },
   "keywords": [],
   "author": "",
@@ -19,5 +19,14 @@
     "express-validator": "^6.15.0",
     "mongoose": "^7.0.1",
     "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.0",
+    "@types/cookie-parser": "^1.4.3",
+    "@types/express": "^4.17.17",
+    "@types/uuid": "^9.0.1",
+    "ts-node-dev": "^2.0.0",
+    "tslib": "^2.5.0",
+    "typescript": "^5.0.2"
   }
 }

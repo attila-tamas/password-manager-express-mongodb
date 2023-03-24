@@ -1,19 +1,19 @@
-const express = require("express");
+import express from "express";
 
-const {
+import {
 	validateRegistration,
 	validateLogin,
 	validateSession,
-} = require("../middlewares/validation/validation-schemas");
+} from "../middlewares/validation/validation-schemas";
 
-const { validateRequest } = require("../middlewares/validation/validate-request");
+import validateRequest from "../middlewares/validation/validate-request";
 
-const {
+import {
 	registerUser,
 	loginUser,
 	logoutUser,
 	getCurrentUser,
-} = require("../controllers/authentication-controller");
+} from "../controllers/authentication-controller";
 
 const router = express.Router();
 
@@ -22,4 +22,4 @@ router.post("/api/user/login", validateLogin, validateRequest, loginUser);
 router.get("/api/user/logout", validateSession, validateRequest, logoutUser);
 router.get("/api/user/current", validateSession, validateRequest, getCurrentUser);
 
-module.exports = router;
+export default router;
