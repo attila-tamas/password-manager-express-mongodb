@@ -17,6 +17,7 @@ const userSchema = new Schema(
 			required: true,
 		},
 		session: String,
+		activatorToken: String,
 	},
 	{ versionKey: false }
 );

@@ -1,15 +1,28 @@
 import { Request, Response, Router } from "express";
 import { v4 as uuidv4 } from "uuid";
 import bcrypt from "bcrypt";
+import nodemailer from "nodemailer";
+
+import "dotenv/config";
+
 import userModel from "../models/user-model";
 import Controller from "../interfaces/controller-interface";
 import AuthenticationValidator from "../middlewares/validation/authentication-validator";
 import validateRequest from "../middlewares/validation/request-validator";
 
 export default class AuthenticationController implements Controller {
-	public readonly router = Router();
+	public router = Router();
 	private user = userModel;
 	private authValidator = new AuthenticationValidator();
+
+	private transport = nodemailer.createTransport({
+		host: process.env["TRANSPORT_HOST"],
+		port: Number(process.env["TRANSPORT_PORT"]),
+		auth: {
+			user: process.env["TRANSPORT_AUTH_USER"],
+			pass: process.env["TRANSPORT_AUTH_PASS"],
+		},
+	});
 
 	constructor() {
 		this.router.post(
@@ -17,6 +30,13 @@ export default class AuthenticationController implements Controller {
 			this.authValidator.validateRegistration,
 			validateRequest,
 			this.registerUser
+		);
+
+		this.router.get(
+			"/api/user/activate/:activatorToken",
+			this.authValidator.validateActivation,
+			validateRequest,
+			this.activateUser
 		);
 
 		this.router.post(
@@ -45,14 +65,46 @@ export default class AuthenticationController implements Controller {
 		try {
 			const { username, email } = req.body;
 			const password = await bcrypt.hash(req.body.password, 10);
+			const activatorToken = uuidv4();
 
 			const createdUser = await this.user.create({
 				username,
 				email,
 				password,
+				activatorToken,
 			});
 
+			await this.transport
+				.sendMail({
+					from: "address@example.com",
+					to: email,
+					subject: "Account activation",
+					html: `
+					<h3>Account activation</h3>
+					<p>
+						Click on this link to activate your account: http://localhost:5000/api/user/activate/${createdUser.activatorToken}
+					</p>`,
+				})
+				.then(message => {
+					console.log(
+						"View account activation email: %s",
+						nodemailer.getTestMessageUrl(message)
+					);
+				});
+
 			return res.status(200).json(createdUser);
+		} catch (error: any) {
+			return res.status(500).json({ message: error.message });
+		}
+	};
+
+	public activateUser = async (req: Request, res: Response) => {
+		try {
+			const activatorToken = req.params["activatorToken"];
+
+			await this.user.updateOne({ activatorToken }, { $unset: { activatorToken } });
+
+			return res.status(200).json({ message: "Account successfully activated" });
 		} catch (error: any) {
 			return res.status(500).json({ message: error.message });
 		}

@@ -1,14 +1,16 @@
 import User from "../../models/user-model";
-import { body, cookie } from "express-validator";
+import { body, cookie, param } from "express-validator";
 import bcrypt from "bcrypt";
 
 export default class AuthenticationValidator {
 	public readonly validateRegistration;
+	public readonly validateActivation;
 	public readonly validateLogin;
 	public readonly validateSession;
 
 	constructor() {
 		this.validateRegistration = this.getRegistrationValidator();
+		this.validateActivation = this.getActivationValidator();
 		this.validateLogin = this.getLoginValidator();
 		this.validateSession = this.getSessionValidator();
 	}
@@ -27,6 +29,7 @@ export default class AuthenticationValidator {
 					const user = await User.findOne({
 						username,
 					});
+
 					if (user) {
 						throw new Error("The given username is already in use");
 					}
@@ -49,6 +52,7 @@ export default class AuthenticationValidator {
 					const user = await User.findOne({
 						email,
 					});
+
 					if (user) {
 						throw new Error("The given email address is already in use");
 					}
@@ -61,6 +65,27 @@ export default class AuthenticationValidator {
 
 				.isLength({ min: 8, max: 32 })
 				.withMessage("The password must be between 8 and 32 characters long"),
+		];
+	}
+
+	private getActivationValidator() {
+		return [
+			param("activatorToken")
+				.trim()
+
+				.custom(async value => {
+					const activatorToken = value;
+
+					const user = await User.findOne({
+						activatorToken,
+					});
+
+					if (!user) {
+						throw new Error("Account already activated");
+					}
+
+					return true;
+				}),
 		];
 	}
 
@@ -78,8 +103,11 @@ export default class AuthenticationValidator {
 					const user = await User.findOne({
 						username,
 					});
+
 					if (!user) {
 						throw new Error("No account found with the given username");
+					} else if (user.activatorToken) {
+						throw new Error("Account is not activated");
 					}
 
 					return true;
@@ -93,6 +121,7 @@ export default class AuthenticationValidator {
 
 				.custom(async (value, { req }) => {
 					const username = req.body.username;
+
 					const user = await User.findOne({ username });
 
 					if (user) {
@@ -121,6 +150,7 @@ export default class AuthenticationValidator {
 					const user = await User.findOne({
 						session,
 					});
+
 					if (!user) {
 						throw new Error("No user found with the given session id");
 					}
