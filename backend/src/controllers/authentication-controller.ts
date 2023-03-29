@@ -1,4 +1,4 @@
-import { Request, Response, Router } from "express";
+import { Request, Response } from "express";
 import { v4 as uuidv4 } from "uuid";
 import bcrypt from "bcrypt";
 import nodemailer from "nodemailer";
@@ -7,58 +7,29 @@ import "dotenv/config";
 
 import userModel from "../models/user-model";
 import Controller from "../interfaces/controller-interface";
-import AuthenticationValidator from "../middlewares/validation/authentication-validator";
-import validateRequest from "../middlewares/validation/request-validator";
+import AuthenticationRoutes from "../routes/authentication-routes";
 
 export default class AuthenticationController implements Controller {
-	public router = Router();
-	private user = userModel;
-	private authValidator = new AuthenticationValidator();
+	public router;
 
-	private transport = nodemailer.createTransport({
-		host: process.env["TRANSPORT_HOST"],
-		port: Number(process.env["TRANSPORT_PORT"]),
-		auth: {
-			user: process.env["TRANSPORT_AUTH_USER"],
-			pass: process.env["TRANSPORT_AUTH_PASS"],
-		},
-	});
+	private user;
+	private authRoutes;
+	private transport;
 
 	constructor() {
-		this.router.post(
-			"/api/user/register",
-			this.authValidator.validateRegistration,
-			validateRequest,
-			this.registerUser
-		);
+		this.authRoutes = new AuthenticationRoutes(this);
+		this.router = this.authRoutes.router;
 
-		this.router.get(
-			"/api/user/activate/:activatorToken",
-			this.authValidator.validateActivation,
-			validateRequest,
-			this.activateUser
-		);
+		this.user = userModel;
 
-		this.router.post(
-			"/api/user/login",
-			this.authValidator.validateLogin,
-			validateRequest,
-			this.loginUser
-		);
-
-		this.router.get(
-			"/api/user/logout",
-			this.authValidator.validateSession,
-			validateRequest,
-			this.logoutUser
-		);
-
-		this.router.get(
-			"/api/user/current",
-			this.authValidator.validateSession,
-			validateRequest,
-			this.getCurrentUser
-		);
+		this.transport = nodemailer.createTransport({
+			host: process.env["TRANSPORT_HOST"],
+			port: Number(process.env["TRANSPORT_PORT"]),
+			auth: {
+				user: process.env["TRANSPORT_AUTH_USER"],
+				pass: process.env["TRANSPORT_AUTH_PASS"],
+			},
+		});
 	}
 
 	public registerUser = async (req: Request, res: Response) => {
