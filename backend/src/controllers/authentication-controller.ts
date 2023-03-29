@@ -63,7 +63,7 @@ export default class AuthenticationController implements Controller {
 					);
 				});
 
-			return res.status(200).json(createdUser);
+			return res.status(200).json({ message: `New user '${createdUser.username}' created` });
 		} catch (error: any) {
 			return res.status(500).json({ message: error.message });
 		}
@@ -73,9 +73,12 @@ export default class AuthenticationController implements Controller {
 		try {
 			const activatorToken = req.params["activatorToken"];
 
-			await this.user.updateOne({ activatorToken }, { $unset: { activatorToken } });
+			await this.user.updateOne(
+				{ activatorToken },
+				{ $unset: { activatorToken }, $set: { active: true } }
+			);
 
-			return res.status(200).json({ message: "Account successfully activated" });
+			return res.status(200).json({ message: "Account activated" });
 		} catch (error: any) {
 			return res.status(500).json({ message: error.message });
 		}
@@ -88,11 +91,9 @@ export default class AuthenticationController implements Controller {
 
 			res.cookie("SESSION_ID", session);
 
-			const user = await this.user.findOneAndUpdate(
-				{ username },
-				{ $set: { session } },
-				{ new: true }
-			);
+			const user = await this.user
+				.findOneAndUpdate({ username }, { $set: { session } }, { new: true })
+				.select("-password");
 
 			return res.status(200).json(user);
 		} catch (error: any) {
@@ -108,7 +109,7 @@ export default class AuthenticationController implements Controller {
 
 			res.clearCookie("SESSION_ID");
 
-			return res.status(200).json({ message: "User successfully logged out" });
+			return res.status(200).json({ message: "User logged out" });
 		} catch (error: any) {
 			return res.status(500).json({ error: error.message });
 		}
@@ -118,7 +119,7 @@ export default class AuthenticationController implements Controller {
 		try {
 			const session = req.cookies["SESSION_ID"];
 
-			const user = await this.user.findOne({ session });
+			const user = await this.user.findOne({ session }).select("-password");
 
 			return res.status(200).json(user);
 		} catch (error: any) {

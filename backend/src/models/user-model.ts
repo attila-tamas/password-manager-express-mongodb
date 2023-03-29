@@ -16,6 +16,10 @@ const userSchema = new Schema(
 			type: String,
 			required: true,
 		},
+		active: {
+			type: Boolean,
+			default: false,
+		},
 		session: String,
 		activatorToken: String,
 	},
