@@ -1,8 +1,11 @@
 import express, { Application } from "express";
 import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 import "dotenv/config";
-import IController from "interfaces/controller-interface";
+
+import corsOptions from "./config/cors-options";
+import IController from "./interfaces/controller-interface";
 
 export default class App {
 	private app: Application;
@@ -20,6 +23,7 @@ export default class App {
 	private setMiddlewares() {
 		this.app.use(express.json());
 		this.app.use(cookieParser());
+		this.app.use(cors(corsOptions));
 	}
 
 	private setRoutes(controllers: IController[]) {
