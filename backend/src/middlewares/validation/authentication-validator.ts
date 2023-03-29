@@ -26,9 +26,7 @@ export default class AuthenticationValidator {
 				.custom(async value => {
 					const username = value;
 
-					const user = await User.findOne({
-						username,
-					});
+					const user = await User.findOne({ username }).lean().exec();
 
 					if (user) {
 						throw new Error("The given username is already in use");
@@ -49,9 +47,7 @@ export default class AuthenticationValidator {
 				.custom(async value => {
 					const email = value;
 
-					const user = await User.findOne({
-						email,
-					});
+					const user = await User.findOne({ email }).lean().exec();
 
 					if (user) {
 						throw new Error("The given email address is already in use");
@@ -76,12 +72,10 @@ export default class AuthenticationValidator {
 				.custom(async value => {
 					const activatorToken = value;
 
-					const user = await User.findOne({
-						activatorToken,
-					});
+					const user = await User.findOne({ activatorToken }).lean().exec();
 
 					if (!user) {
-						throw new Error("Account already activated");
+						throw new Error("Account is already activated");
 					}
 
 					return true;
@@ -100,9 +94,7 @@ export default class AuthenticationValidator {
 				.custom(async value => {
 					const username = value;
 
-					const user = await User.findOne({
-						username,
-					});
+					const user = await User.findOne({ username }).lean().exec();
 
 					if (!user) {
 						throw new Error("No account found with the given username");
@@ -122,7 +114,7 @@ export default class AuthenticationValidator {
 				.custom(async (value, { req }) => {
 					const username = req.body.username;
 
-					const user = await User.findOne({ username });
+					const user = await User.findOne({ username }).lean().exec();
 
 					if (user) {
 						const arePasswordsEqual = await bcrypt.compare(value, user.password);
@@ -147,9 +139,7 @@ export default class AuthenticationValidator {
 				.custom(async value => {
 					const session = value;
 
-					const user = await User.findOne({
-						session,
-					});
+					const user = await User.findOne({ session }).lean().exec();
 
 					if (!user) {
 						throw new Error("No user found with the given session id");
