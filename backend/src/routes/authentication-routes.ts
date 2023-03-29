@@ -1,7 +1,9 @@
 import { Router } from "express";
+
 import validateRequest from "../middlewares/validation/request-validator";
 import AuthenticationController from "../controllers/authentication-controller";
 import AuthenticationValidator from "../middlewares/validation/authentication-validator";
+import limitLoginAttempts from "../middlewares/login-limiter";
 
 export default class AuthenticationRoutes {
 	public router;
@@ -35,6 +37,7 @@ export default class AuthenticationRoutes {
 
 		this.router.post(
 			"/api/user/login",
+			limitLoginAttempts,
 			this.authValidator.validateLogin,
 			validateRequest,
 			this.authController.loginUser
