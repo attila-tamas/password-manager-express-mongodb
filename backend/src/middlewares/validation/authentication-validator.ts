@@ -6,13 +6,13 @@ export default class AuthenticationValidator {
 	public readonly validateRegistration;
 	public readonly validateActivation;
 	public readonly validateLogin;
-	public readonly validateSession;
+	public readonly validateRefresh;
 
 	constructor() {
 		this.validateRegistration = this.getRegistrationValidator();
 		this.validateActivation = this.getActivationValidator();
 		this.validateLogin = this.getLoginValidator();
-		this.validateSession = this.getSessionValidator();
+		this.validateRefresh = this.getRefreshValidator();
 	}
 
 	private getRegistrationValidator() {
@@ -130,23 +130,13 @@ export default class AuthenticationValidator {
 		];
 	}
 
-	private getSessionValidator() {
+	private getRefreshValidator() {
 		return [
-			cookie("SESSION_ID")
+			cookie("jwt") //
+				.trim()
+
 				.notEmpty()
-				.withMessage("The requested session does not exist")
-
-				.custom(async value => {
-					const session = value;
-
-					const user = await User.findOne({ session }).lean().exec();
-
-					if (!user) {
-						throw new Error("No user found with the given session id");
-					}
-
-					return true;
-				}),
+				.withMessage("Unauthorized"),
 		];
 	}
 }

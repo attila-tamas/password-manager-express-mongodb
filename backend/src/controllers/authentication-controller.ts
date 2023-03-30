@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { v4 as uuidv4 } from "uuid";
 import bcrypt from "bcrypt";
 import nodemailer from "nodemailer";
+import jwt from "jsonwebtoken";
 
 import "dotenv/config";
 
@@ -32,6 +33,8 @@ export default class AuthenticationController implements Controller {
 		});
 	}
 
+	// @route /api/auth/register
+	// @access Public
 	public registerUser = async (req: Request, res: Response) => {
 		try {
 			const { username, email } = req.body;
@@ -53,7 +56,7 @@ export default class AuthenticationController implements Controller {
 					html: `
 					<h3>Account activation</h3>
 					<p>
-						Click on this link to activate your account: http://localhost:5000/api/user/activate/${createdUser.activatorToken}
+						Click on this link to activate your account: http://localhost:5000/api/auth/activate/${createdUser.activatorToken}
 					</p>`,
 				})
 				.then(message => {
@@ -69,6 +72,8 @@ export default class AuthenticationController implements Controller {
 		}
 	};
 
+	// @route /api/auth/activate/:activatorToken
+	// @access Public
 	public activateUser = async (req: Request, res: Response) => {
 		try {
 			const activatorToken = req.params["activatorToken"];
@@ -84,44 +89,103 @@ export default class AuthenticationController implements Controller {
 		}
 	};
 
+	// @route /api/auth/login
+	// @access Public
 	public loginUser = async (req: Request, res: Response) => {
 		try {
 			const username = req.body.username;
-			const session = uuidv4(); // generate a session id
 
-			res.cookie("SESSION_ID", session);
+			const user = await this.user.findOne({ username }).exec();
 
-			const user = await this.user
-				.findOneAndUpdate({ username }, { $set: { session } }, { new: true })
-				.select("-password");
+			const accessToken = jwt.sign(
+				{
+					UserInfo: {
+						username: user?.username,
+					},
+				},
+				process.env["ACCESS_TOKEN_SECRET"] as string,
+				{ expiresIn: "10s" }
+			);
 
-			return res.status(200).json(user);
+			const refreshToken = jwt.sign(
+				{ username: user?.username },
+				process.env["REFRESH_TOKEN_SECRET"] as string,
+				{ expiresIn: "1d" }
+			);
+
+			res.cookie("jwt", refreshToken, {
+				httpOnly: true,
+				// secure: true,
+				sameSite: "none",
+				maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+			});
+
+			return res.status(200).json({ accessToken });
 		} catch (error: any) {
 			return res.status(500).json({ message: error.message });
 		}
 	};
 
+	// @route /api/auth/logout
+	// @access Public
 	public logoutUser = async (req: Request, res: Response) => {
 		try {
-			const session = req.cookies["SESSION_ID"];
+			const jwt = req.cookies.jwt;
 
-			await this.user.updateOne({ session }, { $unset: { session } });
-
-			res.clearCookie("SESSION_ID");
+			if (jwt) {
+				res.clearCookie("jwt", { httpOnly: true, /*secure: true,*/ sameSite: "none" });
+			}
 
 			return res.status(200).json({ message: "User logged out" });
 		} catch (error: any) {
-			return res.status(500).json({ error: error.message });
+			return res.status(500).json({ message: error.message });
 		}
 	};
 
+	// @route /api/auth/refresh
+	// @access Public
+	public refreshToken = async (req: Request, res: Response): Promise<any> => {
+		try {
+			const cookies = req.cookies;
+			const refreshToken = cookies.jwt;
+
+			jwt.verify(
+				refreshToken,
+				process.env["REFRESH_TOKEN_SECRET"] as string,
+				async (error: any, decoded: any) => {
+					if (error) {
+						return res.status(400).json({ message: "Forbidden" });
+					}
+
+					const user = await this.user.findOne({ username: decoded.username }).exec();
+
+					if (!user) {
+						return res.status(400).json({ message: "Unauthorized" });
+					}
+
+					const accessToken = jwt.sign(
+						{
+							UserInfo: {
+								username: user.username,
+							},
+						},
+						process.env["ACCESS_TOKEN_SECRET"] as string,
+						{ expiresIn: "10s" }
+					);
+
+					return res.status(200).json({ accessToken });
+				}
+			);
+		} catch (error: any) {
+			return res.status(500).json({ message: error.message });
+		}
+	};
+
+	// @route /api/auth/current
+	// @access Protected
 	public getCurrentUser = async (req: Request, res: Response) => {
 		try {
-			const session = req.cookies["SESSION_ID"];
-
-			const user = await this.user.findOne({ session }).select("-password");
-
-			return res.status(200).json(user);
+			return res.status(200).json((<any>req).user);
 		} catch (error: any) {
 			return res.status(500).json({ error: error.message });
 		}
