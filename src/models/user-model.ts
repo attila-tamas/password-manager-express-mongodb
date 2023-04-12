@@ -2,11 +2,6 @@ import { Schema, model } from "mongoose";
 
 const userSchema = new Schema(
 	{
-		username: {
-			type: String,
-			required: true,
-			unique: true,
-		},
 		email: {
 			type: String,
 			required: true,
@@ -20,7 +15,6 @@ const userSchema = new Schema(
 			type: Boolean,
 			default: false,
 		},
-		session: String,
 		activatorToken: String,
 	},
 	{ versionKey: false }

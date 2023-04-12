@@ -17,24 +17,6 @@ export default class AuthenticationValidator {
 
 	private getRegistrationValidator() {
 		return [
-			body("username")
-				.trim()
-
-				.isLength({ min: 2, max: 8 })
-				.withMessage("The username must be between 2 and 8 characters long")
-
-				.custom(async value => {
-					const username = value;
-
-					const user = await User.findOne({ username }).lean().exec();
-
-					if (user) {
-						throw new Error("The given username is already in use");
-					}
-
-					return true;
-				}),
-
 			body("email")
 				.normalizeEmail()
 
@@ -85,19 +67,19 @@ export default class AuthenticationValidator {
 
 	private getLoginValidator() {
 		return [
-			body("username")
+			body("email")
 				.trim()
 
 				.notEmpty()
-				.withMessage("The username must not be empty")
+				.withMessage("The email address must not be empty")
 
 				.custom(async value => {
-					const username = value;
+					const email = value;
 
-					const user = await User.findOne({ username }).lean().exec();
+					const user = await User.findOne({ email }).lean().exec();
 
 					if (!user) {
-						throw new Error("No account found with the given username");
+						throw new Error("No account found with the given email address");
 					} else if (user.activatorToken) {
 						throw new Error("Account is not activated");
 					}
@@ -112,9 +94,9 @@ export default class AuthenticationValidator {
 				.withMessage("The password must not be empty")
 
 				.custom(async (value, { req }) => {
-					const username = req.body.username;
+					const email = req.body.email;
 
-					const user = await User.findOne({ username }).lean().exec();
+					const user = await User.findOne({ email }).lean().exec();
 
 					if (user) {
 						const arePasswordsEqual = await bcrypt.compare(value, user.password);

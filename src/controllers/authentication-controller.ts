@@ -37,12 +37,11 @@ export default class AuthenticationController implements Controller {
 	// @access Public
 	public registerUser = async (req: Request, res: Response) => {
 		try {
-			const { username, email } = req.body;
+			const email = req.body.email;
 			const password = await bcrypt.hash(req.body.password, 10);
 			const activatorToken = uuidv4();
 
 			const createdUser = await this.user.create({
-				username,
 				email,
 				password,
 				activatorToken,
@@ -66,7 +65,7 @@ export default class AuthenticationController implements Controller {
 					);
 				});
 
-			return res.status(200).json({ message: `New user '${createdUser.username}' created` });
+			return res.status(200).json({ message: `New user '${createdUser.email}' created` });
 		} catch (error: any) {
 			return res.status(500).json({ message: error.message });
 		}
@@ -93,14 +92,14 @@ export default class AuthenticationController implements Controller {
 	// @access Public
 	public loginUser = async (req: Request, res: Response) => {
 		try {
-			const username = req.body.username;
+			const email = req.body.email;
 
-			const user = await this.user.findOne({ username }).exec();
+			const user = await this.user.findOne({ email }).exec();
 
 			const accessToken = jwt.sign(
 				{
 					UserInfo: {
-						username: user?.username,
+						email: user?.email,
 					},
 				},
 				process.env["ACCESS_TOKEN_SECRET"] as string,
@@ -108,7 +107,7 @@ export default class AuthenticationController implements Controller {
 			);
 
 			const refreshToken = jwt.sign(
-				{ username: user?.username },
+				{ email: user?.email },
 				process.env["REFRESH_TOKEN_SECRET"] as string,
 				{ expiresIn: "1d" }
 			);
@@ -157,7 +156,7 @@ export default class AuthenticationController implements Controller {
 						return res.status(400).json({ message: "Forbidden" });
 					}
 
-					const user = await this.user.findOne({ username: decoded.username }).exec();
+					const user = await this.user.findOne({ email: decoded.email }).exec();
 
 					if (!user) {
 						return res.status(400).json({ message: "Unauthorized" });
@@ -166,7 +165,7 @@ export default class AuthenticationController implements Controller {
 					const accessToken = jwt.sign(
 						{
 							UserInfo: {
-								username: user.username,
+								email: user.email,
 							},
 						},
 						process.env["ACCESS_TOKEN_SECRET"] as string,
