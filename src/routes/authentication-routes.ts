@@ -2,7 +2,7 @@ import { Router } from "express";
 
 import validateRequest from "../middlewares/validation/request-validator";
 import AuthenticationController from "../controllers/authentication-controller";
-import AuthenticationValidator from "../middlewares/validation/authentication-validator";
+import AuthenticationValidator from "../middlewares/validation/authentication-request-validator";
 import limitLoginAttempts from "../middlewares/login-limiter";
 import verifyJWT from "../middlewares/verify-jwt";
 
