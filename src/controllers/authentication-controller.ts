@@ -33,7 +33,7 @@ export default class AuthenticationController implements Controller {
 		});
 	}
 
-	// @route /api/auth/register
+	// @route POST /api/auth/register
 	// @access Public
 	public registerUser = async (req: Request, res: Response) => {
 		try {
@@ -71,7 +71,7 @@ export default class AuthenticationController implements Controller {
 		}
 	};
 
-	// @route /api/auth/activate/:activatorToken
+	// @route GET /api/auth/activate/:activatorToken
 	// @access Public
 	public activateUser = async (req: Request, res: Response) => {
 		try {
@@ -88,7 +88,7 @@ export default class AuthenticationController implements Controller {
 		}
 	};
 
-	// @route /api/auth/login
+	// @route POST /api/auth/login
 	// @access Public
 	public loginUser = async (req: Request, res: Response) => {
 		try {
@@ -99,11 +99,12 @@ export default class AuthenticationController implements Controller {
 			const accessToken = jwt.sign(
 				{
 					UserInfo: {
+						id: user?._id,
 						email: user?.email,
 					},
 				},
 				process.env["ACCESS_TOKEN_SECRET"] as string,
-				{ expiresIn: "10s" }
+				{ expiresIn: "10m" } // was 10s
 			);
 
 			const refreshToken = jwt.sign(
@@ -125,7 +126,7 @@ export default class AuthenticationController implements Controller {
 		}
 	};
 
-	// @route /api/auth/logout
+	// @route POST /api/auth/logout
 	// @access Public
 	public logoutUser = async (req: Request, res: Response) => {
 		try {
@@ -141,7 +142,7 @@ export default class AuthenticationController implements Controller {
 		}
 	};
 
-	// @route /api/auth/refresh
+	// @route GET /api/auth/refresh
 	// @access Public
 	public refreshToken = async (req: Request, res: Response): Promise<any> => {
 		try {
@@ -165,11 +166,12 @@ export default class AuthenticationController implements Controller {
 					const accessToken = jwt.sign(
 						{
 							UserInfo: {
+								id: user._id,
 								email: user.email,
 							},
 						},
 						process.env["ACCESS_TOKEN_SECRET"] as string,
-						{ expiresIn: "10s" }
+						{ expiresIn: "10m" }
 					);
 
 					return res.status(200).json({ accessToken });
@@ -180,8 +182,8 @@ export default class AuthenticationController implements Controller {
 		}
 	};
 
-	// @route /api/auth/current
-	// @access Protected
+	// @route GET /api/auth/current
+	// @access Private
 	public getCurrentUser = async (req: Request, res: Response) => {
 		try {
 			return res.status(200).json((<any>req).user);
