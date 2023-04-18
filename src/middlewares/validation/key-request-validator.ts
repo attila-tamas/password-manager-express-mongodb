@@ -1,4 +1,4 @@
-import { body, param } from "express-validator";
+import { body, query } from "express-validator";
 
 import Key from "../../models/key-model";
 
@@ -25,7 +25,7 @@ export default class KeyValidator {
 
 	private getUpdateKeyValidator() {
 		return [
-			param("id") //
+			query("id")
 				.trim()
 
 				.custom(async value => {
@@ -61,7 +61,7 @@ export default class KeyValidator {
 
 	private getDeleteKeyValidator() {
 		return [
-			param("id") //
+			query("id")
 				.trim()
 
 				.custom(async value => {

@@ -36,13 +36,13 @@ export default class KeyRoutes {
 		);
 
 		this.router.get(
-			"/api/key/:keyword", //
+			"/api/key/", //
 			verifyJWT,
 			this.keyController.GetKeysByKeyword
 		);
 
 		this.router.patch(
-			"/api/key/update/:id",
+			"/api/key/update/",
 			verifyJWT,
 			this.keyValidator.validateUpdateKey,
 			validateRequest,
@@ -50,11 +50,17 @@ export default class KeyRoutes {
 		);
 
 		this.router.delete(
-			"/api/key/delete/:id",
+			"/api/key/delete/",
 			verifyJWT,
 			this.keyValidator.validateDeleteKey,
 			validateRequest,
 			this.keyController.DeleteKey
+		);
+
+		this.router.delete(
+			"/api/key/delete/all",
+			verifyJWT,
+			this.keyController.DeleteAllKeysByUserId
 		);
 	}
 }

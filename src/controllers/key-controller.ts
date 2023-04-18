@@ -52,11 +52,11 @@ export default class KeyController implements Controller {
 		}
 	};
 
-	// @route GET /api/key/:keyword
+	// @route GET /api/key/?keyword=
 	// @access Private
 	public GetKeysByKeyword = async (req: Request, res: Response) => {
 		try {
-			const filterRegex = new RegExp(req.params["keyword"] as string, "i");
+			const filterRegex = new RegExp(req.query["keyword"] as string, "i");
 
 			const filteredKeys = await this.key.find({
 				userId: (<any>req).user.id,
@@ -74,11 +74,11 @@ export default class KeyController implements Controller {
 		}
 	};
 
-	// @route PATCH /api/key/update/:id
+	// @route PATCH /api/key/update/?id=
 	// @access Private
 	public UpdateKey = async (req: Request, res: Response) => {
 		try {
-			const id = req.params["id"];
+			const id = req.query["id"];
 			const body = req.body;
 
 			const updatedKey = await this.key.findByIdAndUpdate(id, body, { new: true });
@@ -89,15 +89,27 @@ export default class KeyController implements Controller {
 		}
 	};
 
-	// @route DELETE /api/key/delete/:id
+	// @route DELETE /api/key/delete/?id=
 	// @access Private
 	public DeleteKey = async (req: Request, res: Response) => {
 		try {
-			const id = req.params["id"];
+			const id = req.query["id"];
 
 			const deletedKey = await this.key.findByIdAndDelete(id);
 
 			return res.status(200).json({ message: `Key with ID: ${deletedKey?._id} deleted` });
+		} catch (error: any) {
+			return res.status(500).json({ message: error.message });
+		}
+	};
+
+	// @route DELETE /api/key/delete/all
+	// @access Private
+	public DeleteAllKeysByUserId = async (req: Request, res: Response) => {
+		try {
+			await this.key.deleteMany({ userId: (<any>req).user.id });
+
+			return res.status(200).json({ message: `All keys deleted` });
 		} catch (error: any) {
 			return res.status(500).json({ message: error.message });
 		}
