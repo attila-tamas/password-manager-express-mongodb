@@ -54,8 +54,8 @@ export default class KeyValidator {
 			body("password")
 				.trim()
 
-				.notEmpty()
-				.withMessage("The password must not be empty"),
+				.isLength({ min: 8, max: 32 })
+				.withMessage("The password must be between 8 and 32 characters long"),
 		];
 	}
 

@@ -81,9 +81,20 @@ export default class KeyController implements Controller {
 	public UpdateKey = async (req: Request, res: Response) => {
 		try {
 			const id = req.query["id"];
-			const body = req.body;
+			const { title, username, email, websiteUrl } = req.body;
+			const password = await bcrypt.hash(req.body.password, 10);
 
-			const updatedKey = await this.key.findByIdAndUpdate(id, body, { new: true }).exec();
+			const updatedData = {
+				title,
+				username,
+				email,
+				websiteUrl,
+				password,
+			};
+
+			const updatedKey = await this.key
+				.findByIdAndUpdate(id, updatedData, { new: true })
+				.exec();
 
 			return res.status(200).json(updatedKey);
 		} catch (error: any) {
