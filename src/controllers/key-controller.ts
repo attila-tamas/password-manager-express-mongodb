@@ -44,7 +44,7 @@ export default class KeyController implements Controller {
 	// @access Private
 	public GetAllKeysByUserId = async (req: Request, res: Response) => {
 		try {
-			const keys = await this.key.find({ userId: (<any>req).user.id });
+			const keys = await this.key.find({ userId: (<any>req).user.id }).exec();
 
 			return res.status(200).json(keys);
 		} catch (error: any) {
@@ -58,15 +58,17 @@ export default class KeyController implements Controller {
 		try {
 			const filterRegex = new RegExp(req.query["keyword"] as string, "i");
 
-			const filteredKeys = await this.key.find({
-				userId: (<any>req).user.id,
-				$or: [
-					{ title: filterRegex },
-					{ username: filterRegex },
-					{ email: filterRegex },
-					{ websiteUrl: filterRegex },
-				],
-			});
+			const filteredKeys = await this.key
+				.find({
+					userId: (<any>req).user.id,
+					$or: [
+						{ title: filterRegex },
+						{ username: filterRegex },
+						{ email: filterRegex },
+						{ websiteUrl: filterRegex },
+					],
+				})
+				.exec();
 
 			return res.status(200).json(filteredKeys);
 		} catch (error: any) {
@@ -81,7 +83,7 @@ export default class KeyController implements Controller {
 			const id = req.query["id"];
 			const body = req.body;
 
-			const updatedKey = await this.key.findByIdAndUpdate(id, body, { new: true });
+			const updatedKey = await this.key.findByIdAndUpdate(id, body, { new: true }).exec();
 
 			return res.status(200).json(updatedKey);
 		} catch (error: any) {
@@ -95,7 +97,7 @@ export default class KeyController implements Controller {
 		try {
 			const id = req.query["id"];
 
-			const deletedKey = await this.key.findByIdAndDelete(id);
+			const deletedKey = await this.key.findByIdAndDelete(id).exec();
 
 			return res.status(200).json({ message: `Key with ID: ${deletedKey?._id} deleted` });
 		} catch (error: any) {
@@ -107,7 +109,7 @@ export default class KeyController implements Controller {
 	// @access Private
 	public DeleteAllKeysByUserId = async (req: Request, res: Response) => {
 		try {
-			await this.key.deleteMany({ userId: (<any>req).user.id });
+			await this.key.deleteMany({ userId: (<any>req).user.id }).exec();
 
 			return res.status(200).json({ message: `All keys deleted` });
 		} catch (error: any) {

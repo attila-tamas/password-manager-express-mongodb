@@ -5,6 +5,7 @@ import bcrypt from "bcrypt";
 
 import Controller from "../interfaces/controller-interface";
 import userModel from "../models/user-model";
+import keyModel from "../models/key-model";
 import UserRoutes from "../routes/user-routes";
 import transport from "../util/transport";
 
@@ -12,6 +13,7 @@ export default class UserController implements Controller {
 	public router: any;
 
 	private user;
+	private key;
 	private userRoutes;
 	private transport;
 
@@ -20,6 +22,7 @@ export default class UserController implements Controller {
 		this.router = this.userRoutes.router;
 
 		this.user = userModel;
+		this.key = keyModel;
 		this.transport = transport;
 	}
 
@@ -68,7 +71,7 @@ export default class UserController implements Controller {
 
 	// @route POST /api/user/change-password/:id/:token
 	// @access Public
-	public ChangePassword = async (req: Request, res: Response) => {
+	public ChangePassword = async (req: Request, res: Response): Promise<any> => {
 		try {
 			const { id, token } = req.params;
 			const password = await bcrypt.hash(req.body.password, 10);
@@ -77,12 +80,43 @@ export default class UserController implements Controller {
 
 			jwt.verify(
 				token as string,
-				(process.env["ACCESS_TOKEN_SECRET"] as string) + user?.password
+				(process.env["ACCESS_TOKEN_SECRET"] as string) + user?.password,
+				async (error: any) => {
+					if (error) {
+						return res.status(400).json({ message: "Forbidden" });
+					}
+
+					if (!user) {
+						return res.status(400).json({ message: "Unauthorized" });
+					}
+
+					await this.user.updateOne({ _id: id }, { $set: { password } });
+
+					return res.status(200).json({ message: "Password changed" });
+				}
 			);
+		} catch (error: any) {
+			return res.status(500).json({ message: error.message });
+		}
+	};
 
-			await this.user.updateOne({ _id: id }, { $set: { password } });
+	// @route DELETE /api/user/delete
+	// @access Private
+	public DeleteUser = async (req: Request, res: Response) => {
+		try {
+			const deletedUser = await this.user
+				.findByIdAndDelete({ _id: (<any>req).user.id })
+				.exec();
 
-			return res.status(200).json({ message: "Password changed" });
+			if (!deletedUser) {
+				return res.status(200).json({ message: "User not found" });
+			}
+
+			await this.key.deleteMany({ userId: (<any>req).user.id }).exec();
+
+			res.clearCookie("jwt", { httpOnly: true, /*secure: true,*/ sameSite: "none" });
+
+			return res.status(200).json({ message: "Account deleted" });
 		} catch (error: any) {
 			return res.status(500).json({ message: error.message });
 		}

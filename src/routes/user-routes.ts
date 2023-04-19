@@ -3,6 +3,7 @@ import { Router } from "express";
 import UserValidator from "../middlewares/validation/user-request-validator";
 import UserController from "../controllers/user-controller";
 import validateRequest from "../middlewares/validation/request-validator";
+import verifyJWT from "../middlewares/verify-jwt";
 
 export default class UserRoutes {
 	public router;
@@ -32,6 +33,12 @@ export default class UserRoutes {
 			this.userValidator.validateChangePassword,
 			validateRequest,
 			this.userController.ChangePassword
+		);
+
+		this.router.delete(
+			"/api/user/delete", //
+			verifyJWT,
+			this.userController.DeleteUser
 		);
 	}
 }

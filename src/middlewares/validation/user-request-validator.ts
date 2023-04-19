@@ -41,11 +41,11 @@ export default class UserValidator {
 				.trim()
 
 				.custom(async value => {
-					const id = value;
+					const _id = value;
 
 					// check if the _id is a valid ObjectId
-					if (id.match(/^[0-9a-fA-F]{24}$/)) {
-						const user = await User.findOne({ _id: id }).lean().exec();
+					if (_id.match(/^[0-9a-fA-F]{24}$/)) {
+						const user = await User.findOne({ _id }).lean().exec();
 
 						if (!user) {
 							throw new Error("User not found");
