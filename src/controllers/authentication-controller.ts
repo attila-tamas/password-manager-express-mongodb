@@ -9,6 +9,7 @@ import "dotenv/config";
 import userModel from "../models/user-model";
 import Controller from "../interfaces/controller-interface";
 import AuthenticationRoutes from "../routes/authentication-routes";
+import transport from "../util/transport";
 
 export default class AuthenticationController implements Controller {
 	public router;
@@ -22,15 +23,7 @@ export default class AuthenticationController implements Controller {
 		this.router = this.authRoutes.router;
 
 		this.user = userModel;
-
-		this.transport = nodemailer.createTransport({
-			host: process.env["TRANSPORT_HOST"],
-			port: Number(process.env["TRANSPORT_PORT"]),
-			auth: {
-				user: process.env["TRANSPORT_AUTH_USER"],
-				pass: process.env["TRANSPORT_AUTH_PASS"],
-			},
-		});
+		this.transport = transport;
 	}
 
 	// @route POST /api/auth/register
