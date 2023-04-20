@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import UserValidator from "../middlewares/validation/user-request-validator";
+import userValidator from "../middlewares/validation/user-request-validator";
 import UserController from "../controllers/user-controller";
 import validateRequest from "../middlewares/validation/request-validator";
 import verifyJWT from "../middlewares/verify-jwt";
@@ -13,7 +13,7 @@ export default class UserRoutes {
 
 	constructor(userController: UserController) {
 		this.userController = userController;
-		this.userValidator = new UserValidator();
+		this.userValidator = userValidator;
 
 		this.router = Router();
 
@@ -23,14 +23,14 @@ export default class UserRoutes {
 	private setRoutes() {
 		this.router.post(
 			"/api/user/request-password-change",
-			this.userValidator.validatePasswordChangeRequest,
+			this.userValidator.validatePasswordChangeRequest(),
 			validateRequest,
 			this.userController.RequestPasswordChange
 		);
 
 		this.router.post(
 			"/api/user/change-password/:id/:token",
-			this.userValidator.validateChangePassword,
+			this.userValidator.validateChangePassword(),
 			validateRequest,
 			this.userController.ChangePassword
 		);

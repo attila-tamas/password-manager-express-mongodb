@@ -2,18 +2,8 @@ import { body, query } from "express-validator";
 
 import Key from "../../models/key-model";
 
-export default class KeyValidator {
-	public readonly validateNewKey;
-	public readonly validateUpdateKey;
-	public readonly validateDeleteKey;
-
-	constructor() {
-		this.validateNewKey = this.getNewKeyValidator();
-		this.validateUpdateKey = this.getUpdateKeyValidator();
-		this.validateDeleteKey = this.getDeleteKeyValidator();
-	}
-
-	private getNewKeyValidator() {
+const keyValidator = {
+	validateNewKey() {
 		return [
 			body("password")
 				.trim()
@@ -21,19 +11,21 @@ export default class KeyValidator {
 				.notEmpty()
 				.withMessage("The password must not be empty"),
 		];
-	}
+	},
 
-	private getUpdateKeyValidator() {
+	validateUpdateKey() {
 		return [
 			query("id")
 				.trim()
 
-				.custom(async value => {
+				.custom(async (value, { req }) => {
 					const _id = value;
 
 					// check if the _id is a valid ObjectId
 					if (_id.match(/^[0-9a-fA-F]{24}$/)) {
-						const key = await Key.findOne({ _id }).lean().exec();
+						const key = await Key.findOne({ _id, userId: (<any>req).user.id })
+							.lean()
+							.exec();
 
 						if (!key) {
 							throw new Error("Key not found");
@@ -57,9 +49,9 @@ export default class KeyValidator {
 				.isLength({ min: 8, max: 32 })
 				.withMessage("The password must be between 8 and 32 characters long"),
 		];
-	}
+	},
 
-	private getDeleteKeyValidator() {
+	validateDeleteKey() {
 		return [
 			query("id")
 				.trim()
@@ -81,5 +73,7 @@ export default class KeyValidator {
 					return true;
 				}),
 		];
-	}
-}
+	},
+};
+
+export default keyValidator;

@@ -2,20 +2,8 @@ import User from "../../models/user-model";
 import { body, cookie, param } from "express-validator";
 import bcrypt from "bcrypt";
 
-export default class AuthenticationValidator {
-	public readonly validateRegistration;
-	public readonly validateActivation;
-	public readonly validateLogin;
-	public readonly validateRefresh;
-
-	constructor() {
-		this.validateRegistration = this.getRegistrationValidator();
-		this.validateActivation = this.getActivationValidator();
-		this.validateLogin = this.getLoginValidator();
-		this.validateRefresh = this.getRefreshValidator();
-	}
-
-	private getRegistrationValidator() {
+const authenticationValidator = {
+	validateRegistration() {
 		return [
 			body("email")
 				.normalizeEmail()
@@ -44,9 +32,9 @@ export default class AuthenticationValidator {
 				.isLength({ min: 8, max: 32 })
 				.withMessage("The password must be between 8 and 32 characters long"),
 		];
-	}
+	},
 
-	private getActivationValidator() {
+	validateActivation() {
 		return [
 			param("activatorToken")
 				.trim()
@@ -63,9 +51,9 @@ export default class AuthenticationValidator {
 					return true;
 				}),
 		];
-	}
+	},
 
-	private getLoginValidator() {
+	validateLogin() {
 		return [
 			body("email")
 				.trim()
@@ -110,9 +98,9 @@ export default class AuthenticationValidator {
 					return true;
 				}),
 		];
-	}
+	},
 
-	private getRefreshValidator() {
+	validateRefresh() {
 		return [
 			cookie("jwt") //
 				.trim()
@@ -120,5 +108,7 @@ export default class AuthenticationValidator {
 				.notEmpty()
 				.withMessage("Unauthorized"),
 		];
-	}
-}
+	},
+};
+
+export default authenticationValidator;

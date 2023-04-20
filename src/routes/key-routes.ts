@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import KeyValidator from "../middlewares/validation/key-request-validator";
+import keyValidator from "../middlewares/validation/key-request-validator";
 import KeyController from "../controllers/key-controller";
 import verifyJWT from "../middlewares/verify-jwt";
 import validateRequest from "../middlewares/validation/request-validator";
@@ -13,7 +13,7 @@ export default class KeyRoutes {
 
 	constructor(keyController: KeyController) {
 		this.keyController = keyController;
-		this.keyValidator = new KeyValidator();
+		this.keyValidator = keyValidator;
 
 		this.router = Router();
 
@@ -24,7 +24,7 @@ export default class KeyRoutes {
 		this.router.post(
 			"/api/key/new",
 			verifyJWT,
-			this.keyValidator.validateNewKey,
+			this.keyValidator.validateNewKey(),
 			validateRequest,
 			this.keyController.CreateNewKey
 		);
@@ -44,7 +44,7 @@ export default class KeyRoutes {
 		this.router.patch(
 			"/api/key/update/",
 			verifyJWT,
-			this.keyValidator.validateUpdateKey,
+			this.keyValidator.validateUpdateKey(),
 			validateRequest,
 			this.keyController.UpdateKey
 		);
@@ -52,7 +52,7 @@ export default class KeyRoutes {
 		this.router.delete(
 			"/api/key/delete/",
 			verifyJWT,
-			this.keyValidator.validateDeleteKey,
+			this.keyValidator.validateDeleteKey(),
 			validateRequest,
 			this.keyController.DeleteKey
 		);

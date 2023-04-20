@@ -2,7 +2,7 @@ import { Router } from "express";
 
 import validateRequest from "../middlewares/validation/request-validator";
 import AuthenticationController from "../controllers/authentication-controller";
-import AuthenticationValidator from "../middlewares/validation/authentication-request-validator";
+import authenticationValidator from "../middlewares/validation/authentication-request-validator";
 import limitLoginAttempts from "../middlewares/login-limiter";
 import verifyJWT from "../middlewares/verify-jwt";
 
@@ -14,7 +14,7 @@ export default class AuthenticationRoutes {
 
 	constructor(authenticationController: AuthenticationController) {
 		this.authController = authenticationController;
-		this.authValidator = new AuthenticationValidator();
+		this.authValidator = authenticationValidator;
 
 		this.router = Router();
 
@@ -24,14 +24,14 @@ export default class AuthenticationRoutes {
 	private setRoutes() {
 		this.router.post(
 			"/api/auth/register",
-			this.authValidator.validateRegistration,
+			this.authValidator.validateRegistration(),
 			validateRequest,
 			this.authController.registerUser
 		);
 
 		this.router.get(
 			"/api/auth/activate/:activatorToken",
-			this.authValidator.validateActivation,
+			this.authValidator.validateActivation(),
 			validateRequest,
 			this.authController.activateUser
 		);
@@ -39,7 +39,7 @@ export default class AuthenticationRoutes {
 		this.router.post(
 			"/api/auth/login",
 			limitLoginAttempts,
-			this.authValidator.validateLogin,
+			this.authValidator.validateLogin(),
 			validateRequest,
 			this.authController.loginUser
 		);
@@ -51,7 +51,7 @@ export default class AuthenticationRoutes {
 
 		this.router.get(
 			"/api/auth/refresh",
-			this.authValidator.validateRefresh,
+			this.authValidator.validateRefresh(),
 			validateRequest,
 			this.authController.refreshToken
 		);

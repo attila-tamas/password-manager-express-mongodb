@@ -1,16 +1,8 @@
 import User from "../../models/user-model";
 import { body, param } from "express-validator";
 
-export default class UserValidator {
-	public readonly validatePasswordChangeRequest;
-	public readonly validateChangePassword;
-
-	constructor() {
-		this.validatePasswordChangeRequest = this.getPasswordChangeRequestValidator();
-		this.validateChangePassword = this.getChangePasswordValidator();
-	}
-
-	private getPasswordChangeRequestValidator() {
+const userValidator = {
+	validatePasswordChangeRequest() {
 		return [
 			body("email")
 				.normalizeEmail()
@@ -33,9 +25,9 @@ export default class UserValidator {
 					return true;
 				}),
 		];
-	}
+	},
 
-	private getChangePasswordValidator() {
+	validateChangePassword() {
 		return [
 			param("id")
 				.trim()
@@ -65,5 +57,7 @@ export default class UserValidator {
 				.isLength({ min: 8, max: 32 })
 				.withMessage("The password must be between 8 and 32 characters long"),
 		];
-	}
-}
+	},
+};
+
+export default userValidator;
