@@ -30,7 +30,7 @@ export default class AuthenticationRoutes {
 		);
 
 		this.router.get(
-			"/api/auth/activate/:activatorToken",
+			"/api/auth/activate",
 			this.authValidator.validateActivation(),
 			validateRequest,
 			this.authController.activateUser

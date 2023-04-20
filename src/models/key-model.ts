@@ -21,8 +21,14 @@ const keySchema = new Schema(
 			type: String,
 		},
 		password: {
-			type: String,
-			required: true,
+			value: {
+				type: String,
+				required: true,
+			},
+			iv: {
+				type: String,
+				required: true,
+			},
 		},
 	},
 	{ versionKey: false }

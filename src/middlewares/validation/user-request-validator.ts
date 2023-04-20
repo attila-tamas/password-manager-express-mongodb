@@ -1,5 +1,5 @@
 import User from "../../models/user-model";
-import { body, param } from "express-validator";
+import { body, query } from "express-validator";
 
 const userValidator = {
 	validatePasswordChangeRequest() {
@@ -29,7 +29,7 @@ const userValidator = {
 
 	validateChangePassword() {
 		return [
-			param("id")
+			query("id")
 				.trim()
 
 				.custom(async value => {
@@ -49,7 +49,7 @@ const userValidator = {
 					return true;
 				}),
 
-			param("token").trim(),
+			query("token").trim(),
 
 			body("password")
 				.trim()

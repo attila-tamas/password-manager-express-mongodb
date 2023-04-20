@@ -36,13 +36,13 @@ export default class KeyRoutes {
 		);
 
 		this.router.get(
-			"/api/key/", //
+			"/api/key", //
 			verifyJWT,
 			this.keyController.GetKeysByKeyword
 		);
 
 		this.router.patch(
-			"/api/key/update/",
+			"/api/key/update",
 			verifyJWT,
 			this.keyValidator.validateUpdateKey(),
 			validateRequest,
@@ -50,7 +50,7 @@ export default class KeyRoutes {
 		);
 
 		this.router.delete(
-			"/api/key/delete/",
+			"/api/key/delete",
 			verifyJWT,
 			this.keyValidator.validateDeleteKey(),
 			validateRequest,

@@ -56,12 +56,14 @@ const keyValidator = {
 			query("id")
 				.trim()
 
-				.custom(async value => {
+				.custom(async (value, { req }) => {
 					const _id = value;
 
 					// check if the _id is a valid ObjectId
 					if (_id.match(/^[0-9a-fA-F]{24}$/)) {
-						const key = await Key.findOne({ _id }).lean().exec();
+						const key = await Key.findOne({ _id, userId: (<any>req).user.id })
+							.lean()
+							.exec();
 
 						if (!key) {
 							throw new Error("Key not found");

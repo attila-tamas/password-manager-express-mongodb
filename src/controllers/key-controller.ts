@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
-import bcrypt from "bcrypt";
+
+import { encrypt, decrypt } from "../util/encryption-handler";
 
 import keyModel from "../models/key-model";
 import Controller from "../interfaces/controller-interface";
@@ -23,7 +24,7 @@ export default class KeyController implements Controller {
 	public CreateNewKey = async (req: Request, res: Response) => {
 		try {
 			const { title, username, email, websiteUrl } = req.body;
-			const password = await bcrypt.hash(req.body.password, 10);
+			const encryptedPassword = encrypt(req.body.password);
 
 			await this.key.create({
 				userId: (<any>req).user.id,
@@ -31,7 +32,10 @@ export default class KeyController implements Controller {
 				username,
 				email,
 				websiteUrl,
-				password,
+				password: {
+					value: encryptedPassword.value,
+					iv: encryptedPassword.iv,
+				},
 			});
 
 			return res.status(200).json({ message: `New key created` });
@@ -46,13 +50,24 @@ export default class KeyController implements Controller {
 		try {
 			const keys = await this.key.find({ userId: (<any>req).user.id }).exec();
 
-			return res.status(200).json(keys);
+			const responseData = keys.map((key: any) => {
+				return {
+					id: key._id,
+					title: key.title,
+					username: key.username,
+					email: key.email,
+					websiteUrl: key.websiteUrl,
+					password: decrypt({ password: key.password.value, iv: key.password.iv }),
+				};
+			});
+
+			return res.status(200).json(responseData);
 		} catch (error: any) {
 			return res.status(500).json({ message: error.message });
 		}
 	};
 
-	// @route GET /api/key/?keyword=
+	// @route GET /api/key?keyword=
 	// @access Private
 	public GetKeysByKeyword = async (req: Request, res: Response) => {
 		try {
@@ -70,39 +85,62 @@ export default class KeyController implements Controller {
 				})
 				.exec();
 
-			return res.status(200).json(filteredKeys);
+			const responseData = filteredKeys.map((key: any) => {
+				return {
+					id: key._id,
+					title: key.title,
+					username: key.username,
+					email: key.email,
+					websiteUrl: key.websiteUrl,
+					password: decrypt({ password: key.password.value, iv: key.password.iv }),
+				};
+			});
+
+			return res.status(200).json(responseData);
 		} catch (error: any) {
 			return res.status(500).json({ message: error.message });
 		}
 	};
 
-	// @route PATCH /api/key/update/?id=
+	// @route PATCH /api/key/update?id=
 	// @access Private
 	public UpdateKey = async (req: Request, res: Response) => {
 		try {
 			const id = req.query["id"];
 			const { title, username, email, websiteUrl } = req.body;
-			const password = await bcrypt.hash(req.body.password, 10);
+			const encryptedPassword = encrypt(req.body.password);
 
 			const updatedData = {
 				title,
 				username,
 				email,
 				websiteUrl,
-				password,
+				password: {
+					value: encryptedPassword.value,
+					iv: encryptedPassword.iv,
+				},
 			};
 
 			const updatedKey = await this.key
 				.findByIdAndUpdate(id, updatedData, { new: true })
 				.exec();
 
-			return res.status(200).json(updatedKey);
+			const responseData = {
+				id: updatedKey?._id,
+				title: updatedKey?.title,
+				username: updatedKey?.username,
+				email: updatedKey?.email,
+				websiteUrl: updatedKey?.websiteUrl,
+				password: updatedKey?.password?.value,
+			};
+
+			return res.status(200).json(responseData);
 		} catch (error: any) {
 			return res.status(500).json({ message: error.message });
 		}
 	};
 
-	// @route DELETE /api/key/delete/?id=
+	// @route DELETE /api/key/delete?id=
 	// @access Private
 	public DeleteKey = async (req: Request, res: Response) => {
 		try {

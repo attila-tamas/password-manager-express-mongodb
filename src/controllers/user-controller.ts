@@ -53,7 +53,7 @@ export default class UserController implements Controller {
 					html: `
 					<h3>Password change request</h3>
 					<p>
-						Click on this link to change your password: http://localhost:5000/api/user/change-password/${user?._id}/${passwordChangeToken}
+						Click on this link to change your password: http://localhost:5000/api/user/change-password?id=${user?._id}&token=${passwordChangeToken}
 					</p>`,
 				})
 				.then(message => {
@@ -69,11 +69,11 @@ export default class UserController implements Controller {
 		}
 	};
 
-	// @route POST /api/user/change-password/:id/:token
+	// @route POST /api/user/change-password?id=...&token=...
 	// @access Public
 	public ChangePassword = async (req: Request, res: Response): Promise<any> => {
 		try {
-			const { id, token } = req.params;
+			const { id, token } = req.query;
 			const password = await bcrypt.hash(req.body.password, 10);
 
 			const user = await this.user.findOne({ _id: id }).exec();

@@ -29,7 +29,7 @@ export default class UserRoutes {
 		);
 
 		this.router.post(
-			"/api/user/change-password/:id/:token",
+			"/api/user/change-password",
 			this.userValidator.validateChangePassword(),
 			validateRequest,
 			this.userController.ChangePassword

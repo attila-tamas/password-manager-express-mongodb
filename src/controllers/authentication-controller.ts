@@ -48,7 +48,7 @@ export default class AuthenticationController implements Controller {
 					html: `
 					<h3>Account activation</h3>
 					<p>
-						Click on this link to activate your account: http://localhost:5000/api/auth/activate/${createdUser.activatorToken}
+						Click on this link to activate your account: http://localhost:5000/api/auth/activate?token=${createdUser.activatorToken}
 					</p>`,
 				})
 				.then(message => {
@@ -64,11 +64,11 @@ export default class AuthenticationController implements Controller {
 		}
 	};
 
-	// @route GET /api/auth/activate/:activatorToken
+	// @route GET /api/auth/activate?token=...
 	// @access Public
 	public activateUser = async (req: Request, res: Response) => {
 		try {
-			const activatorToken = req.params["activatorToken"];
+			const activatorToken = req.query["token"];
 
 			await this.user.updateOne(
 				{ activatorToken },

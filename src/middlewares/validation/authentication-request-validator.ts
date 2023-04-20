@@ -1,5 +1,5 @@
 import User from "../../models/user-model";
-import { body, cookie, param } from "express-validator";
+import { body, cookie, query } from "express-validator";
 import bcrypt from "bcrypt";
 
 const authenticationValidator = {
@@ -36,7 +36,7 @@ const authenticationValidator = {
 
 	validateActivation() {
 		return [
-			param("activatorToken")
+			query("token")
 				.trim()
 
 				.custom(async value => {
