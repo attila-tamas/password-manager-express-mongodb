@@ -7,19 +7,6 @@ const keySchema = new Schema(
 			required: true,
 			ref: "User",
 		},
-		title: {
-			type: String,
-			required: true,
-		},
-		username: {
-			type: String,
-		},
-		email: {
-			type: String,
-		},
-		websiteUrl: {
-			type: String,
-		},
 		password: {
 			value: {
 				type: String,
@@ -30,6 +17,15 @@ const keySchema = new Schema(
 				required: true,
 			},
 		},
+		title: {
+			type: String,
+			required: true,
+		},
+		customFields: [
+			{
+				type: Object,
+			},
+		],
 	},
 	{ versionKey: false }
 );

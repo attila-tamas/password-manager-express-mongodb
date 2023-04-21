@@ -30,12 +30,6 @@ export default class KeyRoutes {
 		);
 
 		this.router.get(
-			"/api/key/all", //
-			verifyJWT,
-			this.keyController.GetAllKeysByUserId
-		);
-
-		this.router.get(
 			"/api/key", //
 			verifyJWT,
 			this.keyController.GetKeysByKeyword

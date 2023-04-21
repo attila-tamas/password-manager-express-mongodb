@@ -23,43 +23,29 @@ export default class KeyController implements Controller {
 	// @access Private
 	public CreateNewKey = async (req: Request, res: Response) => {
 		try {
-			const { title, username, email, websiteUrl } = req.body;
+			const title = req.body.title;
 			const encryptedPassword = encrypt(req.body.password);
+			const customFields = req.body.customFields;
 
-			await this.key.create({
+			const createdKey = await this.key.create({
 				userId: (<any>req).user.id,
-				title,
-				username,
-				email,
-				websiteUrl,
 				password: {
 					value: encryptedPassword.value,
 					iv: encryptedPassword.iv,
 				},
+				title,
+				customFields: [...customFields],
 			});
 
-			return res.status(200).json({ message: `New key created` });
-		} catch (error: any) {
-			return res.status(500).json({ message: error.message });
-		}
-	};
-
-	// @route GET /api/key/all
-	// @access Private
-	public GetAllKeysByUserId = async (req: Request, res: Response) => {
-		try {
-			const keys = await this.key.find({ userId: (<any>req).user.id }).exec();
-
-			const responseData = keys.map((key: any) => {
-				return {
-					id: key._id,
-					title: key.title,
-					username: key.username,
-					email: key.email,
-					websiteUrl: key.websiteUrl,
-					password: decrypt({ password: key.password.value, iv: key.password.iv }),
-				};
-			});
+			const responseData = {
+				id: createdKey._id,
+				password: decrypt({
+					password: createdKey?.password?.value,
+					iv: createdKey?.password?.iv,
+				}),
+				title: createdKey.title,
+				customFields: createdKey.customFields,
+			};
 
 			return res.status(200).json(responseData);
 		} catch (error: any) {
@@ -67,6 +53,7 @@ export default class KeyController implements Controller {
 		}
 	};
 
+	// If there is no keyword, all keys will be returned
 	// @route GET /api/key?keyword=
 	// @access Private
 	public GetKeysByKeyword = async (req: Request, res: Response) => {
@@ -88,11 +75,9 @@ export default class KeyController implements Controller {
 			const responseData = filteredKeys.map((key: any) => {
 				return {
 					id: key._id,
-					title: key.title,
-					username: key.username,
-					email: key.email,
-					websiteUrl: key.websiteUrl,
 					password: decrypt({ password: key.password.value, iv: key.password.iv }),
+					title: key.title,
+					customFields: key.customFields,
 				};
 			});
 
@@ -107,31 +92,28 @@ export default class KeyController implements Controller {
 	public UpdateKey = async (req: Request, res: Response) => {
 		try {
 			const id = req.query["id"];
-			const { title, username, email, websiteUrl } = req.body;
+			const title = req.body.title;
 			const encryptedPassword = encrypt(req.body.password);
+			const customFields = req.body.customFields;
 
 			const updatedData = {
-				title,
-				username,
-				email,
-				websiteUrl,
 				password: {
 					value: encryptedPassword.value,
 					iv: encryptedPassword.iv,
 				},
+				title,
+				customFields,
 			};
 
 			const updatedKey = await this.key
-				.findByIdAndUpdate(id, updatedData, { new: true })
+				.findByIdAndUpdate({ _id: id }, updatedData, { new: true })
 				.exec();
 
 			const responseData = {
 				id: updatedKey?._id,
-				title: updatedKey?.title,
-				username: updatedKey?.username,
-				email: updatedKey?.email,
-				websiteUrl: updatedKey?.websiteUrl,
 				password: updatedKey?.password?.value,
+				title: updatedKey?.title,
+				customFields: updatedKey?.customFields,
 			};
 
 			return res.status(200).json(responseData);
@@ -148,7 +130,7 @@ export default class KeyController implements Controller {
 
 			const deletedKey = await this.key.findByIdAndDelete(id).exec();
 
-			return res.status(200).json({ message: `Key with ID: ${deletedKey?._id} deleted` });
+			return res.status(200).json({ message: `${deletedKey?.title} deleted` });
 		} catch (error: any) {
 			return res.status(500).json({ message: error.message });
 		}
