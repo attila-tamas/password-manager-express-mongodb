@@ -15,7 +15,7 @@ const keyValidator = {
 
 	validateUpdateKey() {
 		return [
-			query("id")
+			body("id")
 				.trim()
 
 				.custom(async (value, { req }) => {

@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 
-import { encrypt, decrypt } from "../util/encryption-handler";
+import { decrypt, encrypt } from "../util/encryption-handler";
 
-import keyModel from "../models/key-model";
 import Controller from "../interfaces/controller-interface";
+import keyModel from "../models/key-model";
 import KeyRoutes from "../routes/key-routes";
 
 export default class KeyController implements Controller {
@@ -87,14 +87,12 @@ export default class KeyController implements Controller {
 		}
 	};
 
-	// @route PATCH /api/key/update?id=
+	// @route PATCH /api/key/update
 	// @access Private
 	public UpdateKey = async (req: Request, res: Response) => {
 		try {
-			const id = req.query["id"];
-			const title = req.body.title;
+			const { id, title, customFields } = req.body;
 			const encryptedPassword = encrypt(req.body.password);
-			const customFields = req.body.customFields;
 
 			const updatedData = {
 				password: {
