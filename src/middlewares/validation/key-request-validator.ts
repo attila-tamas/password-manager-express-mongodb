@@ -1,4 +1,4 @@
-import { body, query } from "express-validator";
+import { body } from "express-validator";
 
 import Key from "../../models/key-model";
 
@@ -53,7 +53,7 @@ const keyValidator = {
 
 	validateDeleteKey() {
 		return [
-			query("id")
+			body("id")
 				.trim()
 
 				.custom(async (value, { req }) => {

@@ -23,9 +23,8 @@ export default class KeyController implements Controller {
 	// @access Private
 	public CreateNewKey = async (req: Request, res: Response) => {
 		try {
-			const title = req.body.title;
+			const { title, customFields } = req.body;
 			const encryptedPassword = encrypt(req.body.password);
-			const customFields = req.body.customFields;
 
 			const createdKey = await this.key.create({
 				userId: (<any>req).user.id,
@@ -120,11 +119,11 @@ export default class KeyController implements Controller {
 		}
 	};
 
-	// @route DELETE /api/key/delete?id=
+	// @route DELETE /api/key/delete
 	// @access Private
 	public DeleteKey = async (req: Request, res: Response) => {
 		try {
-			const id = req.query["id"];
+			const id = req.body.id;
 
 			const deletedKey = await this.key.findByIdAndDelete(id).exec();
 
