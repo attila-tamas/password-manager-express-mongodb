@@ -1,15 +1,15 @@
-import { Request, Response } from "express";
-import { v4 as uuidv4 } from "uuid";
 import bcrypt from "bcrypt";
-import nodemailer from "nodemailer";
+import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
+import { v4 as uuidv4 } from "uuid";
 
 import "dotenv/config";
 
-import userModel from "../models/user-model";
+import { sender, transport } from "../util/transport";
+
 import Controller from "../interfaces/controller-interface";
+import userModel from "../models/user-model";
 import AuthenticationRoutes from "../routes/authentication-routes";
-import transport from "../util/transport";
 
 export default class AuthenticationController implements Controller {
 	public router;
@@ -40,23 +40,16 @@ export default class AuthenticationController implements Controller {
 				activatorToken,
 			});
 
-			await this.transport
-				.sendMail({
-					from: "address@example.com",
-					to: email,
-					subject: "Account activation",
-					html: `
+			await this.transport.send({
+				to: email,
+				from: sender,
+				subject: "Account activation",
+				html: `
 					<h3>Account activation</h3>
 					<p>
 						Click on this link to activate your account: http://localhost:5000/api/auth/activate?token=${createdUser.activatorToken}
 					</p>`,
-				})
-				.then(message => {
-					console.log(
-						"View account activation email: %s",
-						nodemailer.getTestMessageUrl(message)
-					);
-				});
+			});
 
 			return res.status(200).json({ message: `New user '${createdUser.email}' created` });
 		} catch (error: any) {
