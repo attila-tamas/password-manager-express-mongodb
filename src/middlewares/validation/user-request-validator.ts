@@ -1,7 +1,29 @@
-import User from "../../models/user-model";
 import { body, query } from "express-validator";
+import User from "../../models/user-model";
 
 const userValidator = {
+	validateResendVerificationEmail() {
+		return [
+			body("email")
+				.trim()
+
+				.notEmpty()
+				.withMessage("The email address must not be empty")
+
+				.custom(async value => {
+					const email = value;
+
+					const user = await User.findOne({ email }).lean().exec();
+
+					if (!user) {
+						throw new Error("No account found with the given email address");
+					}
+
+					return true;
+				}),
+		];
+	},
+
 	validatePasswordChangeRequest() {
 		return [
 			body("email")

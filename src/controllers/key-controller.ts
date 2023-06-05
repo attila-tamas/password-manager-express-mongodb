@@ -20,7 +20,7 @@ export default class KeyController implements Controller {
 	}
 
 	// @route POST /api/key/new
-	// @access Private
+	// @access Protected
 	public CreateNewKey = async (req: Request, res: Response) => {
 		try {
 			const { title, customFields } = req.body;
@@ -54,7 +54,7 @@ export default class KeyController implements Controller {
 
 	// If there is no keyword, all keys will be returned
 	// @route GET /api/key?keyword=
-	// @access Private
+	// @access Protected
 	public GetKeysByKeyword = async (req: Request, res: Response) => {
 		try {
 			const filterRegex = new RegExp(req.query["keyword"] as string, "i");
@@ -87,7 +87,7 @@ export default class KeyController implements Controller {
 	};
 
 	// @route PATCH /api/key/update
-	// @access Private
+	// @access Protected
 	public UpdateKey = async (req: Request, res: Response) => {
 		try {
 			const { id, title, customFields } = req.body;
@@ -120,7 +120,7 @@ export default class KeyController implements Controller {
 	};
 
 	// @route DELETE /api/key/delete
-	// @access Private
+	// @access Protected
 	public DeleteKey = async (req: Request, res: Response) => {
 		try {
 			const id = req.body.id;
@@ -134,7 +134,7 @@ export default class KeyController implements Controller {
 	};
 
 	// @route DELETE /api/key/delete/all
-	// @access Private
+	// @access Protected
 	public DeleteAllKeysByUserId = async (req: Request, res: Response) => {
 		try {
 			await this.key.deleteMany({ userId: (<any>req).user.id }).exec();

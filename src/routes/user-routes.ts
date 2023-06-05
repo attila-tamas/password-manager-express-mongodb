@@ -1,8 +1,9 @@
 import { Router } from "express";
 
-import userValidator from "../middlewares/validation/user-request-validator";
 import UserController from "../controllers/user-controller";
+import limitVerificationEmailRequests from "../middlewares/send-email-limiter";
 import validateRequest from "../middlewares/validation/request-validator";
+import userValidator from "../middlewares/validation/user-request-validator";
 import verifyJWT from "../middlewares/verify-jwt";
 
 export default class UserRoutes {
@@ -21,6 +22,14 @@ export default class UserRoutes {
 	}
 
 	private setRoutes() {
+		this.router.post(
+			"/api/user/resend-verification-email",
+			limitVerificationEmailRequests,
+			this.userValidator.validateResendVerificationEmail(),
+			validateRequest,
+			this.userController.ResendVerificationEmail
+		);
+
 		this.router.post(
 			"/api/user/request-password-change",
 			this.userValidator.validatePasswordChangeRequest(),

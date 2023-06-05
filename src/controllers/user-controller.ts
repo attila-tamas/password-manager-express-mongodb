@@ -26,6 +26,31 @@ export default class UserController implements Controller {
 		this.transport = transport;
 	}
 
+	// @route POST /api/auth/resend-verification-email
+	// @access Public
+	public ResendVerificationEmail = async (req: Request, res: Response) => {
+		try {
+			const email = req.body.email;
+
+			const user = await this.user.findOne({ email }).exec();
+
+			await this.transport.send({
+				to: email,
+				from: sender,
+				subject: "Account activation",
+				html: `
+					<h3>Account activation</h3>
+					<p>
+						Click on this link to activate your account: http://localhost:5000/api/auth/activate?token=${user?.activatorToken}
+					</p>`,
+			});
+
+			return res.status(200).json({ message: "New email sent." });
+		} catch (error: any) {
+			return res.status(500).json({ message: error.message });
+		}
+	};
+
 	// @route POST /api/user/request-password-change
 	// @access Public
 	public RequestPasswordChange = async (req: Request, res: Response) => {
@@ -94,7 +119,7 @@ export default class UserController implements Controller {
 	};
 
 	// @route DELETE /api/user/delete
-	// @access Private
+	// @access Protected
 	public DeleteUser = async (req: Request, res: Response) => {
 		try {
 			const deletedUser = await this.user

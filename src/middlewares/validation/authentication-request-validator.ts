@@ -1,6 +1,6 @@
-import User from "../../models/user-model";
-import { body, cookie, query } from "express-validator";
 import bcrypt from "bcrypt";
+import { body, cookie, query } from "express-validator";
+import User from "../../models/user-model";
 
 const authenticationValidator = {
 	validateRegistration() {

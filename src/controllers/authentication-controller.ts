@@ -169,7 +169,7 @@ export default class AuthenticationController implements Controller {
 	};
 
 	// @route GET /api/auth/current
-	// @access Private
+	// @access Protected
 	public getCurrentUser = async (req: Request, res: Response) => {
 		try {
 			return res.status(200).json((<any>req).user);
