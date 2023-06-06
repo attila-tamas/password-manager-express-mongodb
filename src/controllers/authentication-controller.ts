@@ -7,6 +7,8 @@ import "dotenv/config";
 
 import { sender, transport } from "../util/transport";
 
+import AccountActivationEmailTemplate from "../templates/account-activation-email";
+
 import Controller from "../interfaces/controller-interface";
 import userModel from "../models/user-model";
 import AuthenticationRoutes from "../routes/authentication-routes";
@@ -44,11 +46,7 @@ export default class AuthenticationController implements Controller {
 				to: email,
 				from: sender,
 				subject: "Account activation",
-				html: `
-					<h3>Account activation</h3>
-					<p>
-						Click on this link to activate your account: http://localhost:3000/activate-account/${createdUser.activatorToken}
-					</p>`,
+				html: AccountActivationEmailTemplate(createdUser.activatorToken),
 			});
 
 			return res.status(200).json({ message: `New user '${createdUser.email}' created` });

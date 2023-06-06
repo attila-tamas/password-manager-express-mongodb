@@ -4,6 +4,9 @@ import jwt from "jsonwebtoken";
 
 import { sender, transport } from "../util/transport";
 
+import AccountActivationEmailTemplate from "../templates/account-activation-email";
+import PasswordChangeRequestEmailTemplate from "../templates/password-change-request-email";
+
 import Controller from "../interfaces/controller-interface";
 import keyModel from "../models/key-model";
 import userModel from "../models/user-model";
@@ -38,11 +41,7 @@ export default class UserController implements Controller {
 				to: email,
 				from: sender,
 				subject: "Account activation",
-				html: `
-					<h3>Account activation</h3>
-					<p>
-						Click on this link to activate your account: http://localhost:3000/activate-account/${user?.activatorToken}
-					</p>`,
+				html: AccountActivationEmailTemplate(user?.activatorToken),
 			});
 
 			return res.status(200).json({ message: "New email sent." });
@@ -91,11 +90,7 @@ export default class UserController implements Controller {
 				to: email,
 				from: sender,
 				subject: "Password change request",
-				html: `
-					<h3>Password change request</h3>
-					<p>
-						Click on this link to change your password: http://localhost:5000/api/user/change-password?id=${user?._id}&token=${passwordChangeToken}
-					</p>`,
+				html: PasswordChangeRequestEmailTemplate(user?._id, passwordChangeToken),
 			});
 
 			return res.status(200).json({ message: "Password change link sent" });
