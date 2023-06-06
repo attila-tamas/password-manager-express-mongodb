@@ -30,6 +30,13 @@ export default class UserRoutes {
 			this.userController.ResendVerificationEmail
 		);
 
+		this.router.get(
+			"/api/user/activate",
+			this.userValidator.validateActivation(),
+			validateRequest,
+			this.userController.activateUser
+		);
+
 		this.router.post(
 			"/api/user/request-password-change",
 			this.userValidator.validatePasswordChangeRequest(),

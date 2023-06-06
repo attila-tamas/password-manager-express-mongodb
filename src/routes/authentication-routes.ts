@@ -29,13 +29,6 @@ export default class AuthenticationRoutes {
 			this.authController.registerUser
 		);
 
-		this.router.get(
-			"/api/auth/activate",
-			this.authValidator.validateActivation(),
-			validateRequest,
-			this.authController.activateUser
-		);
-
 		this.router.post(
 			"/api/auth/login",
 			limitLoginAttempts,

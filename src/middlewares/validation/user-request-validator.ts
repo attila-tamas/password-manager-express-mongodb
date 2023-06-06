@@ -24,6 +24,25 @@ const userValidator = {
 		];
 	},
 
+	validateActivation() {
+		return [
+			query("token")
+				.trim()
+
+				.custom(async value => {
+					const activatorToken = value;
+
+					const user = await User.findOne({ activatorToken }).lean().exec();
+
+					if (!user) {
+						throw new Error("Account is already activated");
+					}
+
+					return true;
+				}),
+		];
+	},
+
 	validatePasswordChangeRequest() {
 		return [
 			body("email")

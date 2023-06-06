@@ -41,11 +41,28 @@ export default class UserController implements Controller {
 				html: `
 					<h3>Account activation</h3>
 					<p>
-						Click on this link to activate your account: http://localhost:5000/api/auth/activate?token=${user?.activatorToken}
+						Click on this link to activate your account: http://localhost:3000/activate-account/${user?.activatorToken}
 					</p>`,
 			});
 
 			return res.status(200).json({ message: "New email sent." });
+		} catch (error: any) {
+			return res.status(500).json({ message: error.message });
+		}
+	};
+
+	// @route GET /api/auth/activate?token=...
+	// @access Public
+	public activateUser = async (req: Request, res: Response) => {
+		try {
+			const activatorToken = req.query["token"];
+
+			await this.user.updateOne(
+				{ activatorToken },
+				{ $unset: { activatorToken }, $set: { active: true } }
+			);
+
+			return res.status(200).json({ message: "Account activated" });
 		} catch (error: any) {
 			return res.status(500).json({ message: error.message });
 		}

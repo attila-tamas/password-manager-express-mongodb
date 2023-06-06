@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt";
-import { body, cookie, query } from "express-validator";
+import { body, cookie } from "express-validator";
 import User from "../../models/user-model";
 
 const authenticationValidator = {
@@ -31,25 +31,6 @@ const authenticationValidator = {
 
 				.isLength({ min: 8, max: 32 })
 				.withMessage("The password must be between 8 and 32 characters long"),
-		];
-	},
-
-	validateActivation() {
-		return [
-			query("token")
-				.trim()
-
-				.custom(async value => {
-					const activatorToken = value;
-
-					const user = await User.findOne({ activatorToken }).lean().exec();
-
-					if (!user) {
-						throw new Error("Account is already activated");
-					}
-
-					return true;
-				}),
 		];
 	},
 
