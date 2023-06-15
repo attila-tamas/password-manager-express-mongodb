@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
 
-import { decrypt, encrypt } from "../util/encryption-handler";
+import { decrypt, encrypt } from "@util/encryption-handler";
 
-import Controller from "../interfaces/controller-interface";
-import keyModel from "../models/key-model";
-import KeyRoutes from "../routes/key-routes";
+import Controller from "@interfaces/controller-interface";
+import keyModel from "@models/key-model";
+import KeyRoutes from "@routes/key-routes";
 
 export default class KeyController implements Controller {
 	public router: any;

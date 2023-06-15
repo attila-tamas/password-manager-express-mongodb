@@ -2,15 +2,14 @@ import bcrypt from "bcrypt";
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 
-import { sender, transport } from "../util/transport";
+import AccountActivationEmailTemplate from "@templates/account-activation-email";
+import PasswordChangeRequestEmailTemplate from "@templates/password-change-request-email";
+import { sender, transport } from "@util/transport";
 
-import AccountActivationEmailTemplate from "../templates/account-activation-email";
-import PasswordChangeRequestEmailTemplate from "../templates/password-change-request-email";
-
-import Controller from "../interfaces/controller-interface";
-import keyModel from "../models/key-model";
-import userModel from "../models/user-model";
-import UserRoutes from "../routes/user-routes";
+import Controller from "@interfaces/controller-interface";
+import keyModel from "@models/key-model";
+import userModel from "@models/user-model";
+import UserRoutes from "@routes/user-routes";
 
 export default class UserController implements Controller {
 	public router: any;

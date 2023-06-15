@@ -5,13 +5,12 @@ import { v4 as uuidv4 } from "uuid";
 
 import "dotenv/config";
 
-import { sender, transport } from "../util/transport";
+import AccountActivationEmailTemplate from "@templates/account-activation-email";
+import { sender, transport } from "@util/transport";
 
-import AccountActivationEmailTemplate from "../templates/account-activation-email";
-
-import Controller from "../interfaces/controller-interface";
-import userModel from "../models/user-model";
-import AuthenticationRoutes from "../routes/authentication-routes";
+import Controller from "@interfaces/controller-interface";
+import userModel from "@models/user-model";
+import AuthenticationRoutes from "@routes/authentication-routes";
 
 export default class AuthenticationController implements Controller {
 	public router;

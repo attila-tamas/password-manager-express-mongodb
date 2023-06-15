@@ -1,6 +1,5 @@
+import Key from "@models/key-model";
 import { body } from "express-validator";
-
-import Key from "../../models/key-model";
 
 const keyValidator = {
 	validateNewKey() {

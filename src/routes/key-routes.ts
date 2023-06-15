@@ -1,9 +1,9 @@
 import { Router } from "express";
 
-import keyValidator from "../middlewares/validation/key-request-validator";
-import KeyController from "../controllers/key-controller";
-import verifyJWT from "../middlewares/verify-jwt";
-import validateRequest from "../middlewares/validation/request-validator";
+import KeyController from "@controllers/key-controller";
+import keyValidator from "@middlewares/validation/key-request-validator";
+import validateRequest from "@middlewares/validation/request-validator";
+import verifyJWT from "@middlewares/verify-jwt";
 
 export default class KeyRoutes {
 	public router;

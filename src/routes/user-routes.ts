@@ -1,10 +1,10 @@
 import { Router } from "express";
 
-import UserController from "../controllers/user-controller";
-import limitVerificationEmailRequests from "../middlewares/send-email-limiter";
-import validateRequest from "../middlewares/validation/request-validator";
-import userValidator from "../middlewares/validation/user-request-validator";
-import verifyJWT from "../middlewares/verify-jwt";
+import UserController from "@controllers/user-controller";
+import limitVerificationEmailRequests from "@middlewares/send-email-limiter";
+import validateRequest from "@middlewares/validation/request-validator";
+import userValidator from "@middlewares/validation/user-request-validator";
+import verifyJWT from "@middlewares/verify-jwt";
 
 export default class UserRoutes {
 	public router;

@@ -1,5 +1,5 @@
+import User from "@models/user-model";
 import { body, query } from "express-validator";
-import User from "../../models/user-model";
 
 const userValidator = {
 	validateResendVerificationEmail() {

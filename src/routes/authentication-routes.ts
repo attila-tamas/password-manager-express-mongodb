@@ -1,10 +1,10 @@
 import { Router } from "express";
 
-import AuthenticationController from "../controllers/authentication-controller";
-import limitLoginAttempts from "../middlewares/login-limiter";
-import authenticationValidator from "../middlewares/validation/authentication-request-validator";
-import validateRequest from "../middlewares/validation/request-validator";
-import verifyJWT from "../middlewares/verify-jwt";
+import AuthenticationController from "@controllers/authentication-controller";
+import limitLoginAttempts from "@middlewares/login-limiter";
+import authenticationValidator from "@middlewares/validation/authentication-request-validator";
+import validateRequest from "@middlewares/validation/request-validator";
+import verifyJWT from "@middlewares/verify-jwt";
 
 export default class AuthenticationRoutes {
 	public router;

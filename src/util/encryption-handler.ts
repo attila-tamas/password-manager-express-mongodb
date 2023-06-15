@@ -1,5 +1,4 @@
 import crypto from "crypto";
-
 import "dotenv/config";
 
 const encrypt = (password: any) => {
