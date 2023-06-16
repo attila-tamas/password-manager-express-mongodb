@@ -9,7 +9,6 @@ export default class ValidationRoutes {
 
 	constructor(validationController: ValidationController) {
 		this.router = Router();
-
 		this.setRoutes(validationController);
 	}
 

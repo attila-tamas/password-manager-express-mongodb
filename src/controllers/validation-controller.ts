@@ -19,7 +19,7 @@ export default class ValidationController implements Controller {
 
 	/*
 		method: POST
-		route: POST /api/validate/login/email
+		route: /api/validate/login/email
 		access: Public
 	*/
 	public validateLoginEmail = async (req: Request, res: Response) => {
@@ -46,7 +46,7 @@ export default class ValidationController implements Controller {
 
 	/*
 		method: POST
-		route: POST /api/validate/login/password
+		route: /api/validate/login/password
 		access: Public
 	*/
 	public validateLoginPassword = async (req: Request, res: Response) => {
@@ -73,7 +73,7 @@ export default class ValidationController implements Controller {
 
 	/*
 		method: POST
-		route: POST /api/validate/register/email
+		route: /api/validate/register/email
 		access: Public
 	*/
 	public validateRegisterEmail = async (req: Request, res: Response) => {

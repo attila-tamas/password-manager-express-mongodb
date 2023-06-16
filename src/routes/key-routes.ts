@@ -1,60 +1,65 @@
 import { Router } from "express";
 
-import KeyController from "@controllers/key-controller";
 import errorHandler from "@middlewares/errorHandler";
-import keyValidator from "@middlewares/validation/key-request-validator";
+import {
+	idValidator,
+	paginationValidator,
+	passwordValidator,
+	titleValidator,
+} from "@middlewares/validators";
 import verifyJWT from "@middlewares/verify-jwt";
+
+import KeyController from "@controllers/key-controller";
 
 export default class KeyRoutes {
 	public router;
 
-	private keyController;
-	private keyValidator;
-
 	constructor(keyController: KeyController) {
-		this.keyController = keyController;
-		this.keyValidator = keyValidator;
-
 		this.router = Router();
-
-		this.setRoutes();
+		this.setRoutes(keyController);
 	}
 
-	private setRoutes() {
+	private setRoutes(keyController: KeyController) {
 		this.router.post(
 			"/api/key/new",
 			verifyJWT,
-			this.keyValidator.validateNewKey(),
+			[titleValidator(), passwordValidator()],
 			errorHandler,
-			this.keyController.CreateNewKey
+			keyController.CreateNewKey
 		);
 
+		/*
+			route: /api/key?keyword=...&page=...&sort=...&asc=...
+			default: { keyword: '', page: '1', limit: 10, sort: 'title', asc: 1 }
+		*/
 		this.router.get(
-			"/api/key", //
+			"/api/key",
 			verifyJWT,
-			this.keyController.GetKeysByKeyword
+			paginationValidator(),
+			errorHandler,
+			keyController.GetPaginatedKeysByKeyword
 		);
 
 		this.router.patch(
 			"/api/key/update",
 			verifyJWT,
-			this.keyValidator.validateUpdateKey(),
+			[idValidator(), titleValidator(), passwordValidator()],
 			errorHandler,
-			this.keyController.UpdateKey
+			keyController.UpdateKey
 		);
 
 		this.router.delete(
 			"/api/key/delete",
 			verifyJWT,
-			this.keyValidator.validateDeleteKey(),
+			idValidator(),
 			errorHandler,
-			this.keyController.DeleteKey
+			keyController.DeleteKey
 		);
 
 		this.router.delete(
-			"/api/key/delete/all",
+			"/api/key/delete/all", //
 			verifyJWT,
-			this.keyController.DeleteAllKeysByUserId
+			keyController.DeleteAllKeysByUserId
 		);
 	}
 }

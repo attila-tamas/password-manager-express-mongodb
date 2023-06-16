@@ -50,7 +50,7 @@ export default class AuthenticationController implements Controller {
 				html: AccountActivationEmailTemplate(createdUser.activatorToken),
 			});
 
-			return res.status(201);
+			return res.sendStatus(201);
 		} catch (error: any) {
 			return res.status(500).json({ message: error.message });
 		}

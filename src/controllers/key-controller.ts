@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { matchedData } from "express-validator";
 
 import { decrypt, encrypt } from "@util/encryption-handler";
 
@@ -15,18 +16,20 @@ export default class KeyController implements Controller {
 	constructor() {
 		this.keyRoutes = new KeyRoutes(this);
 		this.router = this.keyRoutes.router;
-
 		this.key = keyModel;
 	}
 
-	// @route POST /api/key/new
-	// @access Protected
+	/*
+		method: POST
+		route: /api/key/new
+		access: Protected
+	*/
 	public CreateNewKey = async (req: Request, res: Response) => {
 		try {
-			const { title, customFields } = req.body;
-			const encryptedPassword = encrypt(req.body.password);
+			const { password, title, customFields } = req.body;
+			const encryptedPassword = encrypt(password);
 
-			const createdKey = await this.key.create({
+			await this.key.create({
 				userId: (<any>req).user.id,
 				password: {
 					value: encryptedPassword.value,
@@ -36,28 +39,25 @@ export default class KeyController implements Controller {
 				customFields: [...customFields],
 			});
 
-			const responseData = {
-				id: createdKey._id,
-				password: decrypt({
-					password: createdKey?.password?.value,
-					iv: createdKey?.password?.iv,
-				}),
-				title: createdKey.title,
-				customFields: createdKey.customFields,
-			};
-
-			return res.status(200).json(responseData);
+			return res.sendStatus(201);
 		} catch (error: any) {
 			return res.status(500).json({ message: error.message });
 		}
 	};
 
-	// If there is no keyword, all keys will be returned
-	// @route GET /api/key?keyword=
-	// @access Protected
-	public GetKeysByKeyword = async (req: Request, res: Response) => {
+	/*
+		method: GET
+		route: /api/key?keyword=...&page=...&sort=...&asc=...
+		access: Protected
+
+		on "/api/key" route it defaults to { keyword: '', page: '1', limit: 10, sort: 'title', asc: 1 }
+		on default it returns the first 10 keys, sorted by the title, in ascending order
+	*/
+	public GetPaginatedKeysByKeyword = async (req: Request, res: Response) => {
 		try {
 			const filterRegex = new RegExp(req.query["keyword"] as string, "i");
+			const { page, limit, sort, asc } = matchedData(req);
+			const previousData = (page - 1) * limit;
 
 			const filteredKeys = await this.key
 				.find({
@@ -69,6 +69,9 @@ export default class KeyController implements Controller {
 						{ websiteUrl: filterRegex },
 					],
 				})
+				.sort({ [sort]: asc })
+				.skip(previousData)
+				.limit(limit)
 				.exec();
 
 			const responseData = filteredKeys.map((key: any) => {
@@ -86,12 +89,15 @@ export default class KeyController implements Controller {
 		}
 	};
 
-	// @route PATCH /api/key/update
-	// @access Protected
+	/*
+		method: PATCH
+		route: /api/key/update
+		access: Protected
+	*/
 	public UpdateKey = async (req: Request, res: Response) => {
 		try {
-			const { id, title, customFields } = req.body;
-			const encryptedPassword = encrypt(req.body.password);
+			const { id, password, title, customFields } = req.body;
+			const encryptedPassword = encrypt(password);
 
 			const updatedData = {
 				password: {
@@ -102,44 +108,41 @@ export default class KeyController implements Controller {
 				customFields,
 			};
 
-			const updatedKey = await this.key
-				.findByIdAndUpdate({ _id: id }, updatedData, { new: true })
-				.exec();
+			await this.key.findByIdAndUpdate({ _id: id }, updatedData, { new: true }).exec();
 
-			const responseData = {
-				id: updatedKey?._id,
-				password: updatedKey?.password?.value,
-				title: updatedKey?.title,
-				customFields: updatedKey?.customFields,
-			};
-
-			return res.status(200).json(responseData);
+			return res.sendStatus(204);
 		} catch (error: any) {
 			return res.status(500).json({ message: error.message });
 		}
 	};
 
-	// @route DELETE /api/key/delete
-	// @access Protected
+	/*
+		method: DELETE
+		route: /api/key/delete
+		access: Protected
+	*/
 	public DeleteKey = async (req: Request, res: Response) => {
 		try {
 			const id = req.body.id;
 
-			const deletedKey = await this.key.findByIdAndDelete(id).exec();
+			await this.key.findByIdAndDelete(id).exec();
 
-			return res.status(200).json({ message: `${deletedKey?.title} deleted` });
+			return res.sendStatus(204);
 		} catch (error: any) {
 			return res.status(500).json({ message: error.message });
 		}
 	};
 
-	// @route DELETE /api/key/delete/all
-	// @access Protected
+	/*
+		method: DELETE
+		route: /api/key/delete/all
+		access: Protected
+	*/
 	public DeleteAllKeysByUserId = async (req: Request, res: Response) => {
 		try {
 			await this.key.deleteMany({ userId: (<any>req).user.id }).exec();
 
-			return res.status(200).json({ message: `All keys deleted` });
+			return res.sendStatus(204);
 		} catch (error: any) {
 			return res.status(500).json({ message: error.message });
 		}
