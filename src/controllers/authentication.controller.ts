@@ -5,12 +5,12 @@ import { v4 as uuidv4 } from "uuid";
 
 import "dotenv/config";
 
-import AccountActivationEmailTemplate from "@templates/account-activation-email";
-import { sender, transport } from "@util/transport";
+import { sender, transport } from "@config/mailService";
+import AccountActivationEmailTemplate from "@templates/accountActivationEmailTemplate";
 
-import Controller from "@interfaces/controller-interface";
-import userModel from "@models/user-model";
-import AuthenticationRoutes from "@routes/authentication-routes";
+import Controller from "@interfaces/controller.interface";
+import userModel from "@models/user.model";
+import AuthenticationRoutes from "@routes/authentication.route";
 
 export default class AuthenticationController implements Controller {
 	public router;
@@ -86,10 +86,10 @@ export default class AuthenticationController implements Controller {
 
 			// create cookie
 			res.cookie("jwt", refreshToken, {
-				httpOnly: true, // accessible only by web server
-				// secure: true, // https only
-				sameSite: "none", // cross-site cookie
-				maxAge: 7 * 24 * 60 * 60 * 1000, // cookie expiry: 7 days
+				httpOnly: true,
+				// secure: true,
+				sameSite: "none",
+				maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
 			});
 
 			return res.status(200).json({ accessToken });

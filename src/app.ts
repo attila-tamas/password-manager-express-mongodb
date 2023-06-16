@@ -5,19 +5,16 @@ import mongoose from "mongoose";
 
 import "dotenv/config";
 
-import corsOptions from "./config/cors-options";
-import IController from "./interfaces/controller-interface";
+import corsOptions from "@config/corsOptions";
+import Controller from "@interfaces/controller.interface";
 
 export default class App {
 	private app: Application;
 
-	constructor(controllers: IController[]) {
+	constructor(controllers: Controller[]) {
 		this.app = express();
-
 		this.setMiddlewares();
-
 		this.setRoutes(controllers);
-
 		this.connectToTheDatabase();
 	}
 
@@ -27,7 +24,7 @@ export default class App {
 		this.app.use(cors(corsOptions));
 	}
 
-	private setRoutes(controllers: IController[]) {
+	private setRoutes(controllers: Controller[]) {
 		controllers.forEach(controller => {
 			this.app.use("/", controller.router);
 		});
@@ -35,12 +32,10 @@ export default class App {
 
 	private connectToTheDatabase() {
 		mongoose
-			.connect(`${process.env["MONGO_URI"]}`)
-
+			.connect(process.env["MONGO_URI"] as string)
 			.then(() => {
-				this.listen(process.env["BACKEND_PORT"]);
+				this.listen(process.env["PORT"]);
 			})
-
 			.catch(error => {
 				console.log(error);
 			});
@@ -48,10 +43,10 @@ export default class App {
 
 	private listen(port: string | undefined) {
 		if (!port) {
-			throw new Error("Backend port is undefined");
+			throw new Error("Port is undefined");
 		} else {
 			this.app.listen(port, () => {
-				console.log("The backend server is listening on port", port);
+				console.log("The server is listening on port", port);
 			});
 		}
 	}

@@ -1,14 +1,14 @@
 import { Request, Response } from "express";
 import { matchedData } from "express-validator";
 
-import { decrypt, encrypt } from "@util/encryption-handler";
+import { decrypt, encrypt } from "@util/encryptionHandler";
 
-import Controller from "@interfaces/controller-interface";
-import keyModel from "@models/key-model";
-import KeyRoutes from "@routes/key-routes";
+import Controller from "@interfaces/controller.interface";
+import keyModel from "@models/key.model";
+import KeyRoutes from "@routes/key.route";
 
 export default class KeyController implements Controller {
-	public router: any;
+	public router;
 
 	private key;
 	private keyRoutes;
@@ -24,7 +24,7 @@ export default class KeyController implements Controller {
 		route: /api/key/new
 		access: Protected
 	*/
-	public CreateNewKey = async (req: Request, res: Response) => {
+	public createNewKey = async (req: Request, res: Response) => {
 		try {
 			const { password, title, customFields } = req.body;
 			const encryptedPassword = encrypt(password);
@@ -53,7 +53,7 @@ export default class KeyController implements Controller {
 		on "/api/key" route it defaults to { keyword: '', page: '1', limit: 10, sort: 'title', asc: 1 }
 		on default it returns the first 10 keys, sorted by the title, in ascending order
 	*/
-	public GetPaginatedKeysByKeyword = async (req: Request, res: Response) => {
+	public getPaginatedKeysByKeyword = async (req: Request, res: Response) => {
 		try {
 			const filterRegex = new RegExp(req.query["keyword"] as string, "i");
 			const { page, limit, sort, asc } = matchedData(req);
@@ -77,7 +77,10 @@ export default class KeyController implements Controller {
 			const responseData = filteredKeys.map((key: any) => {
 				return {
 					id: key._id,
-					password: decrypt({ password: key.password.value, iv: key.password.iv }),
+					password: decrypt({
+						password: key.password.value,
+						iv: key.password.iv,
+					}),
 					title: key.title,
 					customFields: key.customFields,
 				};
@@ -94,7 +97,7 @@ export default class KeyController implements Controller {
 		route: /api/key/update
 		access: Protected
 	*/
-	public UpdateKey = async (req: Request, res: Response) => {
+	public updateKey = async (req: Request, res: Response) => {
 		try {
 			const { id, password, title, customFields } = req.body;
 			const encryptedPassword = encrypt(password);
@@ -121,7 +124,7 @@ export default class KeyController implements Controller {
 		route: /api/key/delete
 		access: Protected
 	*/
-	public DeleteKey = async (req: Request, res: Response) => {
+	public deleteKey = async (req: Request, res: Response) => {
 		try {
 			const id = req.body.id;
 
@@ -138,7 +141,7 @@ export default class KeyController implements Controller {
 		route: /api/key/delete/all
 		access: Protected
 	*/
-	public DeleteAllKeysByUserId = async (req: Request, res: Response) => {
+	public deleteAllKeysByUserId = async (req: Request, res: Response) => {
 		try {
 			await this.key.deleteMany({ userId: (<any>req).user.id }).exec();
 

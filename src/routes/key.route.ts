@@ -1,15 +1,15 @@
 import { Router } from "express";
 
-import errorHandler from "@middlewares/errorHandler";
+import errorHandler from "@middlewares/errorHandler.middleware";
 import {
 	idValidator,
 	paginationValidator,
 	passwordValidator,
 	titleValidator,
-} from "@middlewares/validators";
-import verifyJWT from "@middlewares/verify-jwt";
+} from "@middlewares/validators.middleware";
+import verifyJWT from "@middlewares/verifyJwt.middleware";
 
-import KeyController from "@controllers/key-controller";
+import KeyController from "@controllers/key.controller";
 
 export default class KeyRoutes {
 	public router;
@@ -25,7 +25,7 @@ export default class KeyRoutes {
 			verifyJWT,
 			[titleValidator(), passwordValidator()],
 			errorHandler,
-			keyController.CreateNewKey
+			keyController.createNewKey
 		);
 
 		/*
@@ -37,7 +37,7 @@ export default class KeyRoutes {
 			verifyJWT,
 			paginationValidator(),
 			errorHandler,
-			keyController.GetPaginatedKeysByKeyword
+			keyController.getPaginatedKeysByKeyword
 		);
 
 		this.router.patch(
@@ -45,7 +45,7 @@ export default class KeyRoutes {
 			verifyJWT,
 			[idValidator(), titleValidator(), passwordValidator()],
 			errorHandler,
-			keyController.UpdateKey
+			keyController.updateKey
 		);
 
 		this.router.delete(
@@ -53,13 +53,13 @@ export default class KeyRoutes {
 			verifyJWT,
 			idValidator(),
 			errorHandler,
-			keyController.DeleteKey
+			keyController.deleteKey
 		);
 
 		this.router.delete(
 			"/api/key/delete/all", //
 			verifyJWT,
-			keyController.DeleteAllKeysByUserId
+			keyController.deleteAllKeysByUserId
 		);
 	}
 }

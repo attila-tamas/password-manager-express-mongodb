@@ -1,7 +1,7 @@
 import { body, cookie, query } from "express-validator";
 
-import Key from "@models/key-model";
-import User from "@models/user-model";
+import Key from "@models/key.model";
+import User from "@models/user.model";
 
 const emailValidator = () =>
 	body("email")

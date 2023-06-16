@@ -5,7 +5,7 @@ const errorHandler = (req: Request, res: Response, next: NextFunction) => {
 	const result = validationResult(req).array();
 
 	if (result.length) {
-		const error = result[0]?.msg; // only return the first error at once
+		const error = result[0]?.msg;
 		return res.status(400).json({ message: error });
 	}
 

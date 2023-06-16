@@ -1,12 +1,7 @@
 import { rateLimit } from "express-rate-limit";
 
-/*
-	windowMs: Time frame for which requests are checked/remembered
-	max: The maximum number of connections to allow during the window before rate limiting the client
-*/
-
 const loginLimiter = rateLimit({
-	windowMs: 10 * 1000, // 10s
+	windowMs: 10 * 1000,
 	max: 5,
 	handler: (_req, res) => {
 		return res.status(429).json({
@@ -18,7 +13,7 @@ const loginLimiter = rateLimit({
 });
 
 const requestEmailLimiter = rateLimit({
-	windowMs: 30 * 1000, // 30s
+	windowMs: 30 * 1000,
 	max: 1,
 	handler: (_req, res) => {
 		return res.status(429).json({

@@ -1,19 +1,19 @@
 import bcrypt from "bcrypt";
 import { Request, Response } from "express";
+import { matchedData } from "express-validator";
 import jwt from "jsonwebtoken";
 
-import AccountActivationEmailTemplate from "@templates/account-activation-email";
-import PasswordChangeRequestEmailTemplate from "@templates/password-change-request-email";
-import { sender, transport } from "@util/transport";
+import { sender, transport } from "@config/mailService";
+import AccountActivationEmailTemplate from "@templates/accountActivationEmailTemplate";
+import PasswordChangeRequestEmailTemplate from "@templates/passwordChangeEmailTemplate";
 
-import Controller from "@interfaces/controller-interface";
-import keyModel from "@models/key-model";
-import userModel from "@models/user-model";
-import UserRoutes from "@routes/user-routes";
-import { matchedData } from "express-validator";
+import Controller from "@interfaces/controller.interface";
+import keyModel from "@models/key.model";
+import userModel from "@models/user.model";
+import UserRoutes from "@routes/user.route";
 
 export default class UserController implements Controller {
-	public router: any;
+	public router;
 
 	private user;
 	private key;
@@ -33,10 +33,10 @@ export default class UserController implements Controller {
 		route: /api/auth/resend-verification-email
 		access: Public
 	*/
-	public ResendVerificationEmail = async (req: Request, res: Response) => {
+	public resendVerificationEmail = async (req: Request, res: Response) => {
 		try {
 			const email = req.body.email;
-			const user = matchedData(req); // we are finding the user in the registration validator
+			const user = matchedData(req); // we are finding the user in the registration validator middleware
 
 			await this.transport.send({
 				to: email,
@@ -56,7 +56,7 @@ export default class UserController implements Controller {
 		route: /api/auth/activate
 		access: Public
 	*/
-	public ActivateUser = async (req: Request, res: Response) => {
+	public activateUser = async (req: Request, res: Response) => {
 		try {
 			const activatorToken = req.body.activatorToken;
 
@@ -76,10 +76,10 @@ export default class UserController implements Controller {
 		route: /api/user/request-password-change
 		access: Public
 	*/
-	public RequestPasswordChange = async (req: Request, res: Response) => {
+	public requestPasswordChange = async (req: Request, res: Response) => {
 		try {
 			const email = req.body.email;
-			const user = matchedData(req);
+			const user = matchedData(req); // we are finding the user in the registration validator middleware
 
 			const passwordChangeToken = jwt.sign(
 				{
@@ -110,11 +110,11 @@ export default class UserController implements Controller {
 		route: /api/user/change-password
 		access: Public
 	*/
-	public ChangePassword = async (req: Request, res: Response): Promise<any> => {
+	public changePassword = async (req: Request, res: Response): Promise<any> => {
 		try {
 			const { email, token, password } = req.body;
 			const newPassword = await bcrypt.hash(password, 10);
-			const user = matchedData(req);
+			const user = matchedData(req); // we are finding the user in the registration validator middleware
 
 			jwt.verify(
 				token as string,
@@ -139,7 +139,7 @@ export default class UserController implements Controller {
 		route: /api/user/delete
 		access: Protected
 	*/
-	public DeleteUser = async (req: Request, res: Response) => {
+	public celeteUser = async (req: Request, res: Response) => {
 		try {
 			await this.user.findByIdAndDelete({ _id: (<any>req).user.id }).exec();
 

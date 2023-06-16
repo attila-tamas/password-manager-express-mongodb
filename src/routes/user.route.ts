@@ -1,16 +1,16 @@
 import { Router } from "express";
 
-import errorHandler from "@middlewares/errorHandler";
-import { requestEmailLimiter } from "@middlewares/rate-limiters";
+import errorHandler from "@middlewares/errorHandler.middleware";
+import { requestEmailLimiter } from "@middlewares/rateLimiters.middleware";
 import {
 	activatorTokenValidator,
 	passwordChangeTokenValidator,
 	passwordValidator,
 	registrationValidator,
-} from "@middlewares/validators";
-import verifyJWT from "@middlewares/verify-jwt";
+} from "@middlewares/validators.middleware";
+import verifyJWT from "@middlewares/verifyJwt.middleware";
 
-import UserController from "@controllers/user-controller";
+import UserController from "@controllers/user.controller";
 
 export default class UserRoutes {
 	public router;
@@ -26,14 +26,14 @@ export default class UserRoutes {
 			requestEmailLimiter,
 			registrationValidator(),
 			errorHandler,
-			userController.ResendVerificationEmail
+			userController.resendVerificationEmail
 		);
 
 		this.router.get(
 			"/api/user/activate",
 			activatorTokenValidator(),
 			errorHandler,
-			userController.ActivateUser
+			userController.activateUser
 		);
 
 		this.router.post(
@@ -41,20 +41,20 @@ export default class UserRoutes {
 			requestEmailLimiter,
 			registrationValidator(),
 			errorHandler,
-			userController.RequestPasswordChange
+			userController.requestPasswordChange
 		);
 
 		this.router.post(
 			"/api/user/change-password",
 			[registrationValidator(), passwordChangeTokenValidator(), passwordValidator()],
 			errorHandler,
-			userController.ChangePassword
+			userController.changePassword
 		);
 
 		this.router.delete(
 			"/api/user/delete", //
 			verifyJWT,
-			userController.DeleteUser
+			userController.celeteUser
 		);
 	}
 }
