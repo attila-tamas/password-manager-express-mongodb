@@ -1,9 +1,10 @@
 import { Router } from "express";
 
-import AuthenticationController from "@controllers/authentication-controller";
 import errorHandler from "@middlewares/errorHandler";
 import { loginLimiter } from "@middlewares/rate-limiters";
 import { cookieValidator } from "@middlewares/validators";
+
+import AuthenticationController from "@controllers/authentication-controller";
 
 export default class AuthenticationRoutes {
 	public router;

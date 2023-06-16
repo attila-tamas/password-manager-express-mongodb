@@ -1,8 +1,9 @@
 import { Router } from "express";
 
-import ValidationController from "@controllers/validation-controller";
 import errorHandler from "@middlewares/errorHandler";
 import { emailValidator, passwordValidator } from "@middlewares/validators";
+
+import ValidationController from "@controllers/validation-controller";
 
 export default class ValidationRoutes {
 	public router;

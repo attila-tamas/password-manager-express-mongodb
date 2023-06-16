@@ -103,17 +103,13 @@ export default class AuthenticationController implements Controller {
 		route: /api/auth/logout
 		access: Public
 	*/
-	public logoutUser = async (req: Request, res: Response) => {
+	public logoutUser = async (_req: Request, res: Response) => {
 		try {
-			const jwt = req.cookies.jwt;
-
-			if (jwt) {
-				res.clearCookie("jwt", {
-					httpOnly: true,
-					// secure: true,
-					sameSite: "none",
-				});
-			}
+			res.clearCookie("jwt", {
+				httpOnly: true,
+				// secure: true,
+				sameSite: "none",
+			});
 
 			return res.sendStatus(204);
 		} catch (error: any) {

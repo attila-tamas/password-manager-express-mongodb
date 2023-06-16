@@ -1,60 +1,60 @@
 import { Router } from "express";
 
-import UserController from "@controllers/user-controller";
 import errorHandler from "@middlewares/errorHandler";
-import { sendVerificationEmailLimiter } from "@middlewares/rate-limiters";
-import userValidator from "@middlewares/validation/user-request-validator";
+import { requestEmailLimiter } from "@middlewares/rate-limiters";
+import {
+	activatorTokenValidator,
+	passwordChangeTokenValidator,
+	passwordValidator,
+	registrationValidator,
+} from "@middlewares/validators";
 import verifyJWT from "@middlewares/verify-jwt";
+
+import UserController from "@controllers/user-controller";
 
 export default class UserRoutes {
 	public router;
 
-	private userController;
-	private userValidator;
-
 	constructor(userController: UserController) {
-		this.userController = userController;
-		this.userValidator = userValidator;
-
 		this.router = Router();
-
-		this.setRoutes();
+		this.setRoutes(userController);
 	}
 
-	private setRoutes() {
+	private setRoutes(userController: UserController) {
 		this.router.post(
 			"/api/user/resend-verification-email",
-			sendVerificationEmailLimiter,
-			this.userValidator.validateResendVerificationEmail(),
+			requestEmailLimiter,
+			registrationValidator(),
 			errorHandler,
-			this.userController.ResendVerificationEmail
+			userController.ResendVerificationEmail
 		);
 
 		this.router.get(
 			"/api/user/activate",
-			this.userValidator.validateActivation(),
+			activatorTokenValidator(),
 			errorHandler,
-			this.userController.activateUser
+			userController.ActivateUser
 		);
 
 		this.router.post(
 			"/api/user/request-password-change",
-			this.userValidator.validatePasswordChangeRequest(),
+			requestEmailLimiter,
+			registrationValidator(),
 			errorHandler,
-			this.userController.RequestPasswordChange
+			userController.RequestPasswordChange
 		);
 
 		this.router.post(
 			"/api/user/change-password",
-			this.userValidator.validateChangePassword(),
+			[registrationValidator(), passwordChangeTokenValidator(), passwordValidator()],
 			errorHandler,
-			this.userController.ChangePassword
+			userController.ChangePassword
 		);
 
 		this.router.delete(
 			"/api/user/delete", //
 			verifyJWT,
-			this.userController.DeleteUser
+			userController.DeleteUser
 		);
 	}
 }

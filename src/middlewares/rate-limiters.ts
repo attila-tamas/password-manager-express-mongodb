@@ -17,16 +17,16 @@ const loginLimiter = rateLimit({
 	legacyHeaders: false,
 });
 
-const sendVerificationEmailLimiter = rateLimit({
+const requestEmailLimiter = rateLimit({
 	windowMs: 30 * 1000, // 30s
 	max: 1,
 	handler: (_req, res) => {
 		return res.status(429).json({
-			message: `Too many verification email requests. Try again after 30 seconds.`,
+			message: `Too many email requests. Try again after 30 seconds.`,
 		});
 	},
 	standardHeaders: true,
 	legacyHeaders: false,
 });
 
-export { loginLimiter, sendVerificationEmailLimiter };
+export { loginLimiter, requestEmailLimiter };

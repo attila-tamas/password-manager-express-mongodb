@@ -1,6 +1,7 @@
 import { body, cookie, query } from "express-validator";
 
 import Key from "@models/key-model";
+import User from "@models/user-model";
 
 const emailValidator = () =>
 	body("email")
@@ -9,6 +10,16 @@ const emailValidator = () =>
 
 		.isEmail()
 		.withMessage("Invalid email address");
+
+const registrationValidator = () =>
+	emailValidator() //
+		.custom(async email => {
+			const foundUser = await User.findOne({ email }).exec();
+
+			if (!foundUser) {
+				throw new Error("The given email address is not registered");
+			}
+		});
 
 const passwordValidator = () =>
 	body("password")
@@ -61,11 +72,36 @@ const idValidator = () =>
 			}
 		});
 
+const activatorTokenValidator = () =>
+	body("activatorToken")
+		.trim()
+
+		.notEmpty()
+		.withMessage("The activator token must not be empty")
+
+		.custom(async activatorToken => {
+			const user = await User.findOne({ activatorToken }).lean().exec();
+
+			if (!user) {
+				throw new Error("Account is already activated");
+			}
+		});
+
+const passwordChangeTokenValidator = () =>
+	body("token")
+		.trim()
+
+		.notEmpty()
+		.withMessage("The password change token must not be empty");
+
 export {
 	emailValidator,
+	registrationValidator,
 	passwordValidator,
 	cookieValidator,
 	titleValidator,
 	paginationValidator,
 	idValidator,
+	activatorTokenValidator,
+	passwordChangeTokenValidator,
 };
