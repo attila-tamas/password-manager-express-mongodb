@@ -46,7 +46,7 @@ export default class App {
 			});
 	}
 
-	private listen(port: String | undefined) {
+	private listen(port: string | undefined) {
 		if (!port) {
 			throw new Error("Backend port is undefined");
 		} else {

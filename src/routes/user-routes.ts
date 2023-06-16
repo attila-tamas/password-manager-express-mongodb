@@ -1,8 +1,8 @@
 import { Router } from "express";
 
 import UserController from "@controllers/user-controller";
-import limitVerificationEmailRequests from "@middlewares/send-email-limiter";
-import validateRequest from "@middlewares/validation/request-validator";
+import errorHandler from "@middlewares/errorHandler";
+import { sendVerificationEmailLimiter } from "@middlewares/rate-limiters";
 import userValidator from "@middlewares/validation/user-request-validator";
 import verifyJWT from "@middlewares/verify-jwt";
 
@@ -24,30 +24,30 @@ export default class UserRoutes {
 	private setRoutes() {
 		this.router.post(
 			"/api/user/resend-verification-email",
-			limitVerificationEmailRequests,
+			sendVerificationEmailLimiter,
 			this.userValidator.validateResendVerificationEmail(),
-			validateRequest,
+			errorHandler,
 			this.userController.ResendVerificationEmail
 		);
 
 		this.router.get(
 			"/api/user/activate",
 			this.userValidator.validateActivation(),
-			validateRequest,
+			errorHandler,
 			this.userController.activateUser
 		);
 
 		this.router.post(
 			"/api/user/request-password-change",
 			this.userValidator.validatePasswordChangeRequest(),
-			validateRequest,
+			errorHandler,
 			this.userController.RequestPasswordChange
 		);
 
 		this.router.post(
 			"/api/user/change-password",
 			this.userValidator.validateChangePassword(),
-			validateRequest,
+			errorHandler,
 			this.userController.ChangePassword
 		);
 

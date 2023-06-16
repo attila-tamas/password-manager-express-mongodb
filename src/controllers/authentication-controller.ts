@@ -22,13 +22,15 @@ export default class AuthenticationController implements Controller {
 	constructor() {
 		this.authRoutes = new AuthenticationRoutes(this);
 		this.router = this.authRoutes.router;
-
 		this.user = userModel;
 		this.transport = transport;
 	}
 
-	// @route POST /api/auth/register
-	// @access Public
+	/*
+		method: POST
+		route: /api/auth/register
+		access: Public
+	*/
 	public registerUser = async (req: Request, res: Response) => {
 		try {
 			const email = req.body.email;
@@ -48,14 +50,17 @@ export default class AuthenticationController implements Controller {
 				html: AccountActivationEmailTemplate(createdUser.activatorToken),
 			});
 
-			return res.status(200).json({ message: `New user '${createdUser.email}' created` });
+			return res.status(201);
 		} catch (error: any) {
 			return res.status(500).json({ message: error.message });
 		}
 	};
 
-	// @route POST /api/auth/login
-	// @access Public
+	/*
+		method: POST
+		route: /api/auth/login
+		access: Public
+	*/
 	public loginUser = async (req: Request, res: Response) => {
 		try {
 			const email = req.body.email;
@@ -70,7 +75,7 @@ export default class AuthenticationController implements Controller {
 					},
 				},
 				process.env["ACCESS_TOKEN_SECRET"] as string,
-				{ expiresIn: "10m" } // was 10s
+				{ expiresIn: "10m" }
 			);
 
 			const refreshToken = jwt.sign(
@@ -79,11 +84,12 @@ export default class AuthenticationController implements Controller {
 				{ expiresIn: "1d" }
 			);
 
+			// create cookie
 			res.cookie("jwt", refreshToken, {
-				httpOnly: true,
-				// secure: true,
-				sameSite: "none",
-				maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+				httpOnly: true, // accessible only by web server
+				// secure: true, // https only
+				sameSite: "none", // cross-site cookie
+				maxAge: 7 * 24 * 60 * 60 * 1000, // cookie expiry: 7 days
 			});
 
 			return res.status(200).json({ accessToken });
@@ -92,24 +98,34 @@ export default class AuthenticationController implements Controller {
 		}
 	};
 
-	// @route POST /api/auth/logout
-	// @access Public
+	/*
+		method POST
+		route: /api/auth/logout
+		access: Public
+	*/
 	public logoutUser = async (req: Request, res: Response) => {
 		try {
 			const jwt = req.cookies.jwt;
 
 			if (jwt) {
-				res.clearCookie("jwt", { httpOnly: true, /*secure: true,*/ sameSite: "none" });
+				res.clearCookie("jwt", {
+					httpOnly: true,
+					// secure: true,
+					sameSite: "none",
+				});
 			}
 
-			return res.status(200).json({ message: "User logged out" });
+			return res.sendStatus(204);
 		} catch (error: any) {
 			return res.status(500).json({ message: error.message });
 		}
 	};
 
-	// @route GET /api/auth/refresh
-	// @access Public
+	/*
+		method: GET
+		route: /api/auth/refresh
+		access: Public
+	*/
 	public refreshToken = async (req: Request, res: Response): Promise<any> => {
 		try {
 			const cookies = req.cookies;
@@ -120,13 +136,13 @@ export default class AuthenticationController implements Controller {
 				process.env["REFRESH_TOKEN_SECRET"] as string,
 				async (error: any, decoded: any) => {
 					if (error) {
-						return res.status(400).json({ message: "Forbidden" });
+						return res.status(403).json({ message: "Forbidden" });
 					}
 
 					const user = await this.user.findOne({ email: decoded.email }).exec();
 
 					if (!user) {
-						return res.status(400).json({ message: "Unauthorized" });
+						return res.status(401).json({ message: "Unauthorized" });
 					}
 
 					const accessToken = jwt.sign(
@@ -145,16 +161,6 @@ export default class AuthenticationController implements Controller {
 			);
 		} catch (error: any) {
 			return res.status(500).json({ message: error.message });
-		}
-	};
-
-	// @route GET /api/auth/current
-	// @access Protected
-	public getCurrentUser = async (req: Request, res: Response) => {
-		try {
-			return res.status(200).json((<any>req).user);
-		} catch (error: any) {
-			return res.status(500).json({ error: error.message });
 		}
 	};
 }
