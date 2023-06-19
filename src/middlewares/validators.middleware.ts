@@ -72,20 +72,22 @@ const idValidator = () =>
 			}
 		});
 
-const activatorTokenValidator = () =>
-	body("activatorToken")
+const accountActivationValidator = () => [
+	body("token")
 		.trim()
 
 		.notEmpty()
-		.withMessage("The activator token must not be empty")
+		.withMessage("The verification code must not be empty"),
 
-		.custom(async activatorToken => {
-			const user = await User.findOne({ activatorToken }).lean().exec();
+	emailValidator() //
+		.custom(async email => {
+			const foundUser = await User.findOne({ email }).exec();
 
-			if (!user) {
+			if (foundUser?.active) {
 				throw new Error("Account is already activated");
 			}
-		});
+		}),
+];
 
 const tokenValidator = () =>
 	body("token")
@@ -102,6 +104,6 @@ export {
 	titleValidator,
 	paginationValidator,
 	idValidator,
-	activatorTokenValidator,
+	accountActivationValidator,
 	tokenValidator,
 };

@@ -1,6 +1,5 @@
 import bcrypt from "bcrypt";
 import { Request, Response } from "express";
-import { matchedData } from "express-validator";
 
 import { sender, transport } from "@config/mailService";
 import AccountActivationEmailTemplate from "@templates/accountActivationEmailTemplate";
@@ -36,13 +35,15 @@ export default class UserController implements Controller {
 	public resendVerificationEmail = async (req: Request, res: Response) => {
 		try {
 			const email = req.body.email;
-			const user = matchedData(req); // we are finding the user in the registration validator middleware
+
+			const secret = otp.generateSecret();
+			const token = otp.generateToken(secret);
 
 			await this.transport.send({
 				to: email,
 				from: sender,
 				subject: "Account activation",
-				html: AccountActivationEmailTemplate(user?.["activatorToken"]),
+				html: AccountActivationEmailTemplate(token, otp.tokenMaxAgeSeconds),
 			});
 
 			return res.sendStatus(204);
@@ -58,12 +59,12 @@ export default class UserController implements Controller {
 	*/
 	public activateUser = async (req: Request, res: Response) => {
 		try {
-			const activatorToken = req.body.activatorToken;
+			const { email, token } = req.body;
 
-			await this.user.updateOne(
-				{ activatorToken },
-				{ $unset: { activatorToken }, $set: { active: true } }
-			);
+			const isValid = otp.verify(token, otp.secret);
+			if (!isValid) return res.status(403).json({ message: "Invalid or expired token" });
+
+			await this.user.updateOne({ email }, { $set: { active: true } });
 
 			return res.sendStatus(204);
 		} catch (error: any) {

@@ -1,25 +1,13 @@
+import { expirationDateHandler } from "@util/dateHandler";
+
 export default function PasswordChangeRequestEmailTemplate(
 	token: string,
 	tokenMaxAgeSeconds: number
 ) {
-	const formatOptions = {
-		weekday: "long",
-		hour: "2-digit",
-		minute: "2-digit",
-		year: "numeric",
-		month: "long",
-		day: "numeric",
-	} as const;
-
-	const currentDate = new Date();
-
-	const tokenExpirationDate = new Date(
-		currentDate.getTime() + (tokenMaxAgeSeconds / 60) * 60000
-	).toLocaleDateString("en-GB", formatOptions);
-
+	const tokenExpirationDate = expirationDateHandler(tokenMaxAgeSeconds);
 	return `
 		<div style="width: 100%; background-color: #F8F9FC; display: flex; flex-direction: column; text-align: center;">
-			<div style="max-width: 34.0625em; margin: 4% auto; padding: 2% 4%; background-color: #FFFFFF; border-radius: 0.5em; border: 0.0625em solid #EDEEF1;">
+			<div style="max-width: 34.0625em; margin: 4% auto; padding: 2% 4%; padding-top: 0; background-color: #FFFFFF; border-radius: 0.5em; border: 0.0625em solid #EDEEF1;">
 
 				<div style="width: fit-content; display: flex; align-items: center; gap: 0.5em; margin: 0 auto;">
 					<svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

@@ -3,7 +3,7 @@ import { Router } from "express";
 import errorHandler from "@middlewares/errorHandler.middleware";
 import { requestEmailLimiter } from "@middlewares/rateLimiters.middleware";
 import {
-	activatorTokenValidator,
+	accountActivationValidator,
 	emailValidator,
 	passwordValidator,
 	registrationValidator,
@@ -29,9 +29,9 @@ export default class UserRoutes {
 			userController.resendVerificationEmail
 		);
 
-		this.router.get(
+		this.router.post(
 			"/api/user/activate",
-			activatorTokenValidator(),
+			accountActivationValidator(),
 			errorHandler,
 			userController.activateUser
 		);

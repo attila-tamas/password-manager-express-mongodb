@@ -1,7 +1,6 @@
 import bcrypt from "bcrypt";
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
-import { v4 as uuidv4 } from "uuid";
 
 import "dotenv/config";
 
@@ -11,6 +10,7 @@ import AccountActivationEmailTemplate from "@templates/accountActivationEmailTem
 import Controller from "@interfaces/controller.interface";
 import userModel from "@models/user.model";
 import AuthenticationRoutes from "@routes/authentication.route";
+import otp from "@util/otpHandler";
 
 export default class AuthenticationController implements Controller {
 	public router;
@@ -35,19 +35,17 @@ export default class AuthenticationController implements Controller {
 		try {
 			const email = req.body.email;
 			const password = await bcrypt.hash(req.body.password, 10);
-			const activatorToken = uuidv4();
 
-			const createdUser = await this.user.create({
-				email,
-				password,
-				activatorToken,
-			});
+			const secret = otp.generateSecret();
+			const token = otp.generateToken(secret);
+
+			await this.user.create({ email, password });
 
 			await this.transport.send({
 				to: email,
 				from: sender,
 				subject: "Account activation",
-				html: AccountActivationEmailTemplate(createdUser.activatorToken),
+				html: AccountActivationEmailTemplate(token, otp.tokenMaxAgeSeconds),
 			});
 
 			return res.sendStatus(201);

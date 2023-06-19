@@ -33,7 +33,7 @@ export default class AuthenticationRoutes {
 
 		this.router.get(
 			"/api/auth/refresh",
-			cookieValidator,
+			cookieValidator(),
 			errorHandler,
 			authController.refreshToken
 		);
