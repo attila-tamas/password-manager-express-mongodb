@@ -64,9 +64,8 @@ export default class KeyController implements Controller {
 					userId: (<any>req).user.id,
 					$or: [
 						{ title: filterRegex },
-						{ username: filterRegex },
-						{ email: filterRegex },
-						{ websiteUrl: filterRegex },
+						{ "customFields.key": filterRegex },
+						{ "customFields.value": filterRegex },
 					],
 				})
 				.sort({ [sort]: asc })
