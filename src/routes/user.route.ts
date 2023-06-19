@@ -54,7 +54,7 @@ export default class UserRoutes {
 		this.router.delete(
 			"/api/user/delete", //
 			verifyJWT,
-			userController.celeteUser
+			userController.deleteUser
 		);
 	}
 }

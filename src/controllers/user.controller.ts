@@ -139,11 +139,13 @@ export default class UserController implements Controller {
 		route: /api/user/delete
 		access: Protected
 	*/
-	public celeteUser = async (req: Request, res: Response) => {
+	public deleteUser = async (req: Request, res: Response) => {
 		try {
-			await this.user.findByIdAndDelete({ _id: (<any>req).user.id }).exec();
+			const userId = (<any>req).user.id;
 
-			await this.key.deleteMany({ userId: (<any>req).user.id }).exec();
+			await this.user.findByIdAndDelete({ _id: userId }).exec();
+
+			await this.key.deleteMany({ userId }).exec();
 
 			res.clearCookie("jwt", {
 				httpOnly: true,
