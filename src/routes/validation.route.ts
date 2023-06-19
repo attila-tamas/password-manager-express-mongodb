@@ -1,7 +1,11 @@
 import { Router } from "express";
 
 import errorHandler from "@middlewares/errorHandler.middleware";
-import { emailValidator, passwordValidator } from "@middlewares/validators.middleware";
+import {
+	emailValidator,
+	passwordValidator,
+	tokenValidator,
+} from "@middlewares/validators.middleware";
 
 import ValidationController from "@controllers/validation.controller";
 
@@ -45,6 +49,13 @@ export default class ValidationRoutes {
 			passwordValidator(),
 			errorHandler,
 			validationController.validateLoginPassword
+		);
+
+		this.router.post(
+			"/api/validate/otp",
+			tokenValidator(),
+			errorHandler,
+			validationController.validateOtp
 		);
 	}
 }

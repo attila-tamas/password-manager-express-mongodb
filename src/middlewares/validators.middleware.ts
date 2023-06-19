@@ -87,12 +87,12 @@ const activatorTokenValidator = () =>
 			}
 		});
 
-const passwordChangeTokenValidator = () =>
+const tokenValidator = () =>
 	body("token")
 		.trim()
 
 		.notEmpty()
-		.withMessage("The password change token must not be empty");
+		.withMessage("The token must not be empty");
 
 export {
 	emailValidator,
@@ -103,5 +103,5 @@ export {
 	paginationValidator,
 	idValidator,
 	activatorTokenValidator,
-	passwordChangeTokenValidator,
+	tokenValidator,
 };

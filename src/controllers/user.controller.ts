@@ -1,7 +1,6 @@
 import bcrypt from "bcrypt";
 import { Request, Response } from "express";
 import { matchedData } from "express-validator";
-import jwt from "jsonwebtoken";
 
 import { sender, transport } from "@config/mailService";
 import AccountActivationEmailTemplate from "@templates/accountActivationEmailTemplate";
@@ -11,6 +10,7 @@ import Controller from "@interfaces/controller.interface";
 import keyModel from "@models/key.model";
 import userModel from "@models/user.model";
 import UserRoutes from "@routes/user.route";
+import otp from "@util/otpHandler";
 
 export default class UserController implements Controller {
 	public router;
@@ -79,27 +79,18 @@ export default class UserController implements Controller {
 	public requestPasswordChange = async (req: Request, res: Response) => {
 		try {
 			const email = req.body.email;
-			const user = matchedData(req); // we are finding the user in the registration validator middleware
 
-			const passwordChangeToken = jwt.sign(
-				{
-					UserInfo: {
-						id: user?.["_id"],
-						email: user?.["email"],
-					},
-				},
-				(process.env["ACCESS_TOKEN_SECRET"] as string) + user?.["password"],
-				{ expiresIn: "10m" }
-			);
+			const secret = otp.generateSecret();
+			const token = otp.generateToken(secret);
 
 			await this.transport.send({
 				to: email,
 				from: sender,
 				subject: "Password change request",
-				html: PasswordChangeRequestEmailTemplate(user?.["_id"], passwordChangeToken),
+				html: PasswordChangeRequestEmailTemplate(token, otp.tokenMaxAgeSeconds),
 			});
 
-			return res.status(204);
+			return res.sendStatus(204);
 		} catch (error: any) {
 			return res.status(500).json({ message: error.message });
 		}
@@ -112,23 +103,16 @@ export default class UserController implements Controller {
 	*/
 	public changePassword = async (req: Request, res: Response): Promise<any> => {
 		try {
-			const { email, token, password } = req.body;
+			const { email, password } = req.body;
 			const newPassword = await bcrypt.hash(password, 10);
-			const user = matchedData(req); // we are finding the user in the registration validator middleware
 
-			jwt.verify(
-				token as string,
-				(process.env["ACCESS_TOKEN_SECRET"] as string) + user?.["password"],
-				async (error: any) => {
-					if (error) {
-						return res.status(403).json({ message: "Forbidden" });
-					}
+			await this.user.updateOne({ email }, { $set: { password: newPassword } });
 
-					await this.user.updateOne({ email }, { $set: { password: newPassword } });
+			// make the current token one-time use only
+			// generating a new secret will make the current token fail on verification
+			otp.generateSecret();
 
-					return res.sendStatus(204);
-				}
-			);
+			return res.sendStatus(204);
 		} catch (error: any) {
 			return res.status(500).json({ message: error.message });
 		}
@@ -153,7 +137,7 @@ export default class UserController implements Controller {
 				sameSite: "none",
 			});
 
-			return res.status(204);
+			return res.sendStatus(204);
 		} catch (error: any) {
 			return res.status(500).json({ message: error.message });
 		}

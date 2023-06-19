@@ -4,6 +4,7 @@ import { Request, Response } from "express";
 import Controller from "@interfaces/controller.interface";
 import userModel from "@models/user.model";
 import ValidationRoutes from "@routes/validation.route";
+import otp from "@util/otpHandler";
 
 export default class ValidationController implements Controller {
 	public router;
@@ -100,6 +101,24 @@ export default class ValidationController implements Controller {
 					return res.status(401).json({ message: "Incorrect password" });
 				}
 			}
+
+			return res.sendStatus(204);
+		} catch (error: any) {
+			return res.status(500).json({ message: error.message });
+		}
+	};
+
+	/*
+		method: POST
+		route: /api/validate/otp
+		access: Public
+	*/
+	public validateOtp = async (req: Request, res: Response) => {
+		try {
+			const token = req.body.token;
+
+			const isValid = otp.verify(token, otp.secret);
+			if (!isValid) return res.status(403).json({ message: "Invalid or expired token" });
 
 			return res.sendStatus(204);
 		} catch (error: any) {
