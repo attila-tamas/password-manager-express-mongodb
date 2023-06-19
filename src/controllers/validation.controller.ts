@@ -19,6 +19,46 @@ export default class ValidationController implements Controller {
 
 	/*
 		method: POST
+		route: /api/validate/register/email
+		access: Public
+	*/
+	public validateRegistrationEmail = async (req: Request, res: Response) => {
+		try {
+			const email = req.body.email;
+
+			const foundUser = await this.user.findOne({ email }).lean().exec();
+
+			if (foundUser) {
+				return res
+					.status(409)
+					.json({ message: "The given email address is already in use" });
+			}
+
+			return res.sendStatus(204);
+		} catch (error: any) {
+			return res.status(500).json({ message: error.message });
+		}
+	};
+
+	/*
+		method: POST
+		route: /api/validate/register/password
+		access: Public
+	*/
+	public validateRegistrationPassword = async (_req: Request, res: Response) => {
+		try {
+			/*
+				the validation is done through a middleware
+				if we get here that means the validation is successful
+			*/
+			return res.sendStatus(204);
+		} catch (error: any) {
+			return res.status(500).json({ message: error.message });
+		}
+	};
+
+	/*
+		method: POST
 		route: /api/validate/login/email
 		access: Public
 	*/
@@ -59,29 +99,6 @@ export default class ValidationController implements Controller {
 				if (!arePasswordsEqual) {
 					return res.status(401).json({ message: "Incorrect password" });
 				}
-			}
-
-			return res.sendStatus(204);
-		} catch (error: any) {
-			return res.status(500).json({ message: error.message });
-		}
-	};
-
-	/*
-		method: POST
-		route: /api/validate/register/email
-		access: Public
-	*/
-	public validateRegisterEmail = async (req: Request, res: Response) => {
-		try {
-			const email = req.body.email;
-
-			const foundUser = await this.user.findOne({ email }).lean().exec();
-
-			if (foundUser) {
-				return res
-					.status(409)
-					.json({ message: "The given email address is already in use" });
 			}
 
 			return res.sendStatus(204);

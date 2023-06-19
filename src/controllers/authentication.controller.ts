@@ -124,8 +124,7 @@ export default class AuthenticationController implements Controller {
 	*/
 	public refreshToken = async (req: Request, res: Response): Promise<any> => {
 		try {
-			const cookies = req.cookies;
-			const refreshToken = cookies.jwt;
+			const refreshToken = req.cookies.jwt;
 
 			jwt.verify(
 				refreshToken,
