@@ -39,7 +39,7 @@ export default class KeyController implements Controller {
 				customFields: [...customFields],
 			});
 
-			return res.sendStatus(201);
+			return res.status(201).json({ message: "New key created" });
 		} catch (error: any) {
 			return res.status(500).json({ message: error.message });
 		}

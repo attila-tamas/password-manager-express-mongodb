@@ -48,7 +48,7 @@ export default class AuthenticationController implements Controller {
 				html: AccountActivationEmailTemplate(token, otp.tokenMaxAgeSeconds),
 			});
 
-			return res.sendStatus(201);
+			return res.status(201).json({ message: "New user registered" });
 		} catch (error: any) {
 			return res.status(500).json({ message: error.message });
 		}
