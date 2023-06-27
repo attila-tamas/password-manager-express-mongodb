@@ -6,7 +6,7 @@ import {
 	accountActivationValidator,
 	emailValidator,
 	passwordValidator,
-	registrationValidator,
+	usedEmailValidator,
 } from "@middlewares/validators.middleware";
 import verifyJWT from "@middlewares/verifyJwt.middleware";
 
@@ -24,7 +24,7 @@ export default class UserRoutes {
 		this.router.post(
 			"/api/user/resend-verification-email",
 			requestEmailLimiter,
-			registrationValidator(),
+			usedEmailValidator(),
 			errorHandler,
 			userController.resendVerificationEmail
 		);

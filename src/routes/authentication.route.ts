@@ -2,7 +2,7 @@ import { Router } from "express";
 
 import errorHandler from "@middlewares/errorHandler.middleware";
 import { loginLimiter } from "@middlewares/rateLimiters.middleware";
-import { cookieValidator } from "@middlewares/validators.middleware";
+import { cookieValidator, loginValidator } from "@middlewares/validators.middleware";
 
 import AuthenticationController from "@controllers/authentication.controller";
 
@@ -23,6 +23,8 @@ export default class AuthenticationRoutes {
 		this.router.post(
 			"/api/auth/login", //
 			loginLimiter,
+			loginValidator(),
+			errorHandler,
 			authController.loginUser
 		);
 

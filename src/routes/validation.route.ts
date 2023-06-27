@@ -2,9 +2,10 @@ import { Router } from "express";
 
 import errorHandler from "@middlewares/errorHandler.middleware";
 import {
-	emailValidator,
+	otpValidator,
 	passwordValidator,
-	tokenValidator,
+	unusedEmailValidator,
+	usedEmailValidator,
 } from "@middlewares/validators.middleware";
 
 import ValidationController from "@controllers/validation.controller";
@@ -12,7 +13,6 @@ import ValidationController from "@controllers/validation.controller";
 export default class ValidationRoutes {
 	/*
 		these routes exist to provide real time data validation
-		for the authentication fields on the frontend
 	*/
 
 	public router;
@@ -25,7 +25,7 @@ export default class ValidationRoutes {
 	private setRoutes(validationController: ValidationController) {
 		this.router.post(
 			"/api/validate/register/email",
-			emailValidator(),
+			unusedEmailValidator(),
 			errorHandler,
 			validationController.validateRegistrationEmail
 		);
@@ -39,21 +39,14 @@ export default class ValidationRoutes {
 
 		this.router.post(
 			"/api/validate/login/email",
-			emailValidator(),
+			usedEmailValidator(),
 			errorHandler,
 			validationController.validateLoginEmail
 		);
 
 		this.router.post(
-			"/api/validate/login/password",
-			passwordValidator(),
-			errorHandler,
-			validationController.validateLoginPassword
-		);
-
-		this.router.post(
 			"/api/validate/otp",
-			tokenValidator(),
+			otpValidator(),
 			errorHandler,
 			validationController.validateOtp
 		);

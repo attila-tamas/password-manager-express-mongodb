@@ -1,3 +1,5 @@
+import otp from "@util/otpHandler";
+import bcrypt from "bcrypt";
 import { body, cookie, query } from "express-validator";
 
 import Key from "@models/key.model";
@@ -11,13 +13,41 @@ const emailValidator = () =>
 		.isEmail()
 		.withMessage("Invalid email address");
 
-const registrationValidator = () =>
+const unusedEmailValidator = () =>
+	emailValidator() //
+		.custom(async email => {
+			const foundUser = await User.findOne({ email }).lean().exec();
+
+			if (foundUser) {
+				throw new Error("Email address is already in use");
+			}
+		});
+
+const usedEmailValidator = () =>
 	emailValidator() //
 		.custom(async email => {
 			const foundUser = await User.findOne({ email }).exec();
 
 			if (!foundUser) {
-				throw new Error("The given email address is not registered");
+				throw new Error("Email address is not registered");
+			}
+		});
+
+const loginValidator = () =>
+	body() //
+		.custom(async ({ email, password }) => {
+			const foundUser = await User.findOne({ email }).exec();
+
+			if (foundUser) {
+				const arePasswordsEqual = await bcrypt.compare(password, foundUser.password);
+
+				if (!arePasswordsEqual) {
+					throw new Error("Incorrect password");
+				}
+			}
+
+			if (!foundUser?.active) {
+				throw new Error("Email address is not verified");
 			}
 		});
 
@@ -26,10 +56,39 @@ const passwordValidator = () =>
 		.trim()
 
 		.notEmpty()
-		.withMessage("The password must not be empty")
+		.withMessage("The password must not be empty");
 
-		.isLength({ min: 12, max: 256 })
-		.withMessage("The password must be at least 12 characters long");
+const accountActivationValidator = () => [
+	body("token")
+		.trim()
+
+		.notEmpty()
+		.withMessage("The verification code must not be empty"),
+
+	emailValidator() //
+		.custom(async email => {
+			const foundUser = await User.findOne({ email }).exec();
+
+			if (foundUser?.active) {
+				throw new Error("Account is already activated");
+			}
+		}),
+];
+
+const otpValidator = () =>
+	body("token")
+		.trim()
+
+		.notEmpty()
+		.withMessage("The otp must not be empty")
+
+		.custom(async token => {
+			const isValid = otp.verify(token, otp.secret);
+
+			if (!isValid) {
+				throw new Error("Invalid or expired code");
+			}
+		});
 
 const cookieValidator = () =>
 	cookie("jwt") //
@@ -72,38 +131,16 @@ const idValidator = () =>
 			}
 		});
 
-const accountActivationValidator = () => [
-	body("token")
-		.trim()
-
-		.notEmpty()
-		.withMessage("The verification code must not be empty"),
-
-	emailValidator() //
-		.custom(async email => {
-			const foundUser = await User.findOne({ email }).exec();
-
-			if (foundUser?.active) {
-				throw new Error("Account is already activated");
-			}
-		}),
-];
-
-const tokenValidator = () =>
-	body("token")
-		.trim()
-
-		.notEmpty()
-		.withMessage("The token must not be empty");
-
 export {
 	emailValidator,
-	registrationValidator,
+	unusedEmailValidator,
+	usedEmailValidator,
+	loginValidator,
 	passwordValidator,
+	accountActivationValidator,
+	otpValidator,
 	cookieValidator,
 	titleValidator,
 	paginationValidator,
 	idValidator,
-	accountActivationValidator,
-	tokenValidator,
 };

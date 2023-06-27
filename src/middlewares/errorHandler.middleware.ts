@@ -6,7 +6,7 @@ const errorHandler = (req: Request, res: Response, next: NextFunction) => {
 
 	if (result.length) {
 		const error = result[0]?.msg;
-		return res.status(400).json({ message: error });
+		return res.status(409).json({ message: error });
 	}
 
 	return next();
