@@ -1,5 +1,3 @@
-const currentDate = new Date();
-
 const formatOptions = {
 	weekday: "long",
 	hour: "2-digit",
@@ -12,6 +10,7 @@ const formatOptions = {
 const dateFormatter = (date: Date) => date.toLocaleDateString("en-GB", formatOptions);
 
 const expirationDateHandler = (expirationTimeInSeconds: number) => {
+	const currentDate = new Date();
 	return dateFormatter(new Date(currentDate.getTime() + (expirationTimeInSeconds / 60) * 60000));
 };
 
