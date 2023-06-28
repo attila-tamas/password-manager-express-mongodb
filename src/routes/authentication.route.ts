@@ -3,6 +3,7 @@ import { Router } from "express";
 import errorHandler from "@middlewares/errorHandler.middleware";
 import { loginLimiter } from "@middlewares/rateLimiters.middleware";
 import { cookieValidator, loginValidator } from "@middlewares/validators.middleware";
+import verifyJWT from "@middlewares/verifyJwt.middleware";
 
 import AuthenticationController from "@controllers/authentication.controller";
 
@@ -38,6 +39,12 @@ export default class AuthenticationRoutes {
 			cookieValidator(),
 			errorHandler,
 			authController.refreshToken
+		);
+
+		this.router.get(
+			"/api/auth/current", //
+			verifyJWT,
+			authController.getCurrentUser
 		);
 	}
 }

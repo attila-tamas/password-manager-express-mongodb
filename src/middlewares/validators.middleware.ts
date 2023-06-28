@@ -45,10 +45,6 @@ const loginValidator = () =>
 					throw new Error("Incorrect password");
 				}
 			}
-
-			if (!foundUser?.active) {
-				throw new Error("Email address is not verified");
-			}
 		});
 
 const passwordValidator = () =>
@@ -80,7 +76,7 @@ const otpValidator = () =>
 		.trim()
 
 		.notEmpty()
-		.withMessage("The otp must not be empty")
+		.withMessage("The verification code must not be empty")
 
 		.custom(async token => {
 			const isValid = otp.verify(token, otp.secret);

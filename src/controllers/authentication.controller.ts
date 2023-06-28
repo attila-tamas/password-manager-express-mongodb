@@ -67,9 +67,10 @@ export default class AuthenticationController implements Controller {
 
 			const accessToken = jwt.sign(
 				{
-					UserInfo: {
+					userInfo: {
 						id: user?._id,
 						email: user?.email,
+						active: user?.active,
 					},
 				},
 				process.env["ACCESS_TOKEN_SECRET"] as string,
@@ -140,9 +141,10 @@ export default class AuthenticationController implements Controller {
 
 					const accessToken = jwt.sign(
 						{
-							UserInfo: {
-								id: user._id,
-								email: user.email,
+							userInfo: {
+								id: user?._id,
+								email: user?.email,
+								active: user?.active,
 							},
 						},
 						process.env["ACCESS_TOKEN_SECRET"] as string,
@@ -154,6 +156,19 @@ export default class AuthenticationController implements Controller {
 			);
 		} catch (error: any) {
 			return res.status(500).json({ message: error.message });
+		}
+	};
+
+	/*
+		method: GET
+		route: /api/auth/current
+		access: Protected
+	*/
+	public getCurrentUser = async (req: Request, res: Response) => {
+		try {
+			return res.status(200).json((<any>req).user);
+		} catch (error: any) {
+			return res.status(500).json({ error: error.message });
 		}
 	};
 }

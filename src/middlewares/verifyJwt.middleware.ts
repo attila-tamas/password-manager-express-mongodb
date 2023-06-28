@@ -18,7 +18,7 @@ const verifyJWT = (req: Request, res: Response, next: NextFunction): any => {
 				return res.status(403).json({ message: "Forbidden" });
 			}
 
-			(<any>req).user = decoded.UserInfo;
+			(<any>req).user = decoded.userInfo;
 
 			return next();
 		}
