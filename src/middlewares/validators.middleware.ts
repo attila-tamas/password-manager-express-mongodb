@@ -2,7 +2,7 @@ import otp from "@util/otpHandler";
 import bcrypt from "bcrypt";
 import { body, cookie, query } from "express-validator";
 
-import Key from "@models/key.model";
+import Entry from "@models/entry.model";
 import User from "@models/user.model";
 
 const emailValidator = () =>
@@ -115,12 +115,12 @@ const idValidator = () =>
 		.custom(async (_id, { req }) => {
 			// check if the _id is a valid ObjectId
 			if (_id.match(/^[0-9a-fA-F]{24}$/)) {
-				const key = await Key.findOne({ _id, userId: (<any>req).user.id })
+				const entry = await Entry.findOne({ _id, userId: (<any>req).user.id })
 					.lean()
 					.exec();
 
-				if (!key) {
-					throw new Error("Key not found");
+				if (!entry) {
+					throw new Error("Entry not found");
 				}
 			} else {
 				throw new Error("Invalid id");

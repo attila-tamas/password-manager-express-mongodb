@@ -6,7 +6,7 @@ import AccountActivationEmailTemplate from "@templates/accountActivationEmailTem
 import PasswordChangeRequestEmailTemplate from "@templates/passwordChangeEmailTemplate";
 
 import Controller from "@interfaces/controller.interface";
-import keyModel from "@models/key.model";
+import entryModel from "@models/entry.model";
 import userModel from "@models/user.model";
 import UserRoutes from "@routes/user.route";
 import otp from "@util/otpHandler";
@@ -15,7 +15,7 @@ export default class UserController implements Controller {
 	public router;
 
 	private user;
-	private key;
+	private entry;
 	private userRoutes;
 	private transport;
 
@@ -23,7 +23,7 @@ export default class UserController implements Controller {
 		this.userRoutes = new UserRoutes(this);
 		this.router = this.userRoutes.router;
 		this.user = userModel;
-		this.key = keyModel;
+		this.entry = entryModel;
 		this.transport = transport;
 	}
 
@@ -130,7 +130,7 @@ export default class UserController implements Controller {
 
 			await this.user.findByIdAndDelete({ _id: userId }).exec();
 
-			await this.key.deleteMany({ userId }).exec();
+			await this.entry.deleteMany({ userId }).exec();
 
 			res.clearCookie("jwt", {
 				httpOnly: true,

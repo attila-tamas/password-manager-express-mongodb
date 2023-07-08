@@ -4,32 +4,32 @@ import { matchedData } from "express-validator";
 import { decrypt, encrypt } from "@util/encryptionHandler";
 
 import Controller from "@interfaces/controller.interface";
-import keyModel from "@models/key.model";
-import KeyRoutes from "@routes/key.route";
+import entryModel from "@models/entry.model";
+import EntryRoutes from "@routes/entry.route";
 
-export default class KeyController implements Controller {
+export default class EntryController implements Controller {
 	public router;
 
-	private key;
-	private keyRoutes;
+	private entry;
+	private entryRoutes;
 
 	constructor() {
-		this.keyRoutes = new KeyRoutes(this);
-		this.router = this.keyRoutes.router;
-		this.key = keyModel;
+		this.entryRoutes = new EntryRoutes(this);
+		this.router = this.entryRoutes.router;
+		this.entry = entryModel;
 	}
 
 	/*
 		method: POST
-		route: /api/key/new
+		route: /api/entry/new
 		access: Protected
 	*/
-	public createNewKey = async (req: Request, res: Response) => {
+	public createNewEntry = async (req: Request, res: Response) => {
 		try {
 			const { password, title, customFields } = req.body;
 			const encryptedPassword = encrypt(password);
 
-			await this.key.create({
+			await this.entry.create({
 				userId: (<any>req).user.id,
 				password: {
 					value: encryptedPassword.value,
@@ -39,7 +39,7 @@ export default class KeyController implements Controller {
 				customFields: [...customFields],
 			});
 
-			return res.status(201).json({ message: "New key created" });
+			return res.status(201).json({ message: "New entry created" });
 		} catch (error: any) {
 			return res.status(500).json({ message: error.message });
 		}
@@ -47,19 +47,18 @@ export default class KeyController implements Controller {
 
 	/*
 		method: GET
-		route: /api/key?keyword=...&page=...&limit=...&sort=...&asc=...
+		route: /api/entry?keyword=...&page=...&limit=...&sort=...&asc=...
 		access: Protected
 
-		on "/api/key" route it defaults to { keyword: '', page: '1', limit: 10, sort: 'title', asc: 1 }
-		on default it returns the first 10 keys, sorted by the title, in ascending order
+		on "/api/entry" route it defaults to { keyword: '', page: '1', limit: 10, sort: 'title', asc: 1 }
 	*/
-	public getPaginatedKeysByKeyword = async (req: Request, res: Response) => {
+	public getPaginatedEntriesByKeyword = async (req: Request, res: Response) => {
 		try {
 			const filterRegex = new RegExp(req.query["keyword"] as string, "i");
 			const { page, limit, sort, asc } = matchedData(req);
 			const previousData = (page - 1) * limit;
 
-			const filteredKeys = await this.key
+			const filteredEntries = await this.entry
 				.find({
 					userId: (<any>req).user.id,
 					$or: [
@@ -73,15 +72,15 @@ export default class KeyController implements Controller {
 				.limit(limit)
 				.exec();
 
-			const responseData = filteredKeys.map((key: any) => {
+			const responseData = filteredEntries.map((entry: any) => {
 				return {
-					id: key._id,
+					id: entry._id,
 					password: decrypt({
-						password: key.password.value,
-						iv: key.password.iv,
+						password: entry.password.value,
+						iv: entry.password.iv,
 					}),
-					title: key.title,
-					customFields: key.customFields,
+					title: entry.title,
+					customFields: entry.customFields,
 				};
 			});
 
@@ -93,10 +92,10 @@ export default class KeyController implements Controller {
 
 	/*
 		method: PATCH
-		route: /api/key/update
+		route: /api/entry/update
 		access: Protected
 	*/
-	public updateKey = async (req: Request, res: Response) => {
+	public updateEntry = async (req: Request, res: Response) => {
 		try {
 			const { id, password, title, customFields } = req.body;
 			const encryptedPassword = encrypt(password);
@@ -110,7 +109,7 @@ export default class KeyController implements Controller {
 				customFields,
 			};
 
-			await this.key.findByIdAndUpdate({ _id: id }, updatedData, { new: true }).exec();
+			await this.entry.findByIdAndUpdate({ _id: id }, updatedData, { new: true }).exec();
 
 			return res.sendStatus(204);
 		} catch (error: any) {
@@ -120,14 +119,14 @@ export default class KeyController implements Controller {
 
 	/*
 		method: DELETE
-		route: /api/key/delete
+		route: /api/entry/delete
 		access: Protected
 	*/
-	public deleteKey = async (req: Request, res: Response) => {
+	public deleteEntry = async (req: Request, res: Response) => {
 		try {
 			const id = req.body.id;
 
-			await this.key.findByIdAndDelete(id).exec();
+			await this.entry.findByIdAndDelete(id).exec();
 
 			return res.sendStatus(204);
 		} catch (error: any) {
@@ -137,12 +136,12 @@ export default class KeyController implements Controller {
 
 	/*
 		method: DELETE
-		route: /api/key/delete/all
+		route: /api/entry/delete/all
 		access: Protected
 	*/
-	public deleteAllKeysByUserId = async (req: Request, res: Response) => {
+	public deleteAllEntriesByUserId = async (req: Request, res: Response) => {
 		try {
-			await this.key.deleteMany({ userId: (<any>req).user.id }).exec();
+			await this.entry.deleteMany({ userId: (<any>req).user.id }).exec();
 
 			return res.sendStatus(204);
 		} catch (error: any) {

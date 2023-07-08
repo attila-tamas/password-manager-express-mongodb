@@ -1,6 +1,6 @@
 import { model, Schema } from "mongoose";
 
-const keySchema = new Schema(
+const entrySchema = new Schema(
 	{
 		userId: {
 			type: Schema.Types.ObjectId,
@@ -30,6 +30,6 @@ const keySchema = new Schema(
 	{ versionKey: false }
 );
 
-const keyModel = model("Key", keySchema);
+const entryModel = model("Entry", entrySchema);
 
-export default keyModel;
+export default entryModel;

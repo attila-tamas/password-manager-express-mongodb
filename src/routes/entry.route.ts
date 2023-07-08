@@ -9,57 +9,57 @@ import {
 } from "@middlewares/validators.middleware";
 import verifyJWT from "@middlewares/verifyJwt.middleware";
 
-import KeyController from "@controllers/key.controller";
+import EntryController from "@controllers/entry.controller";
 
-export default class KeyRoutes {
+export default class EntryRoutes {
 	public router;
 
-	constructor(keyController: KeyController) {
+	constructor(entryController: EntryController) {
 		this.router = Router();
-		this.setRoutes(keyController);
+		this.setRoutes(entryController);
 	}
 
-	private setRoutes(keyController: KeyController) {
+	private setRoutes(entryController: EntryController) {
 		this.router.post(
-			"/api/key/new",
+			"/api/entry/new",
 			verifyJWT,
 			[titleValidator(), passwordValidator()],
 			errorHandler,
-			keyController.createNewKey
+			entryController.createNewEntry
 		);
 
 		/*
-			route: /api/key?keyword=...&page=...&sort=...&asc=...
+			route: /api/entry?keyword=...&page=...&sort=...&asc=...
 			default: { keyword: '', page: '1', limit: 10, sort: 'title', asc: 1 }
 		*/
 		this.router.get(
-			"/api/key",
+			"/api/entry",
 			verifyJWT,
 			paginationValidator(),
 			errorHandler,
-			keyController.getPaginatedKeysByKeyword
+			entryController.getPaginatedEntriesByKeyword
 		);
 
 		this.router.patch(
-			"/api/key/update",
+			"/api/entry/update",
 			verifyJWT,
 			[idValidator(), titleValidator(), passwordValidator()],
 			errorHandler,
-			keyController.updateKey
+			entryController.updateEntry
 		);
 
 		this.router.delete(
-			"/api/key/delete",
+			"/api/entry/delete",
 			verifyJWT,
 			idValidator(),
 			errorHandler,
-			keyController.deleteKey
+			entryController.deleteEntry
 		);
 
 		this.router.delete(
-			"/api/key/delete/all", //
+			"/api/entry/delete/all", //
 			verifyJWT,
-			keyController.deleteAllKeysByUserId
+			entryController.deleteAllEntriesByUserId
 		);
 	}
 }
