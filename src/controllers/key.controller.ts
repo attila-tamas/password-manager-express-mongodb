@@ -47,7 +47,7 @@ export default class KeyController implements Controller {
 
 	/*
 		method: GET
-		route: /api/key?keyword=...&page=...&sort=...&asc=...
+		route: /api/key?keyword=...&page=...&limit=...&sort=...&asc=...
 		access: Protected
 
 		on "/api/key" route it defaults to { keyword: '', page: '1', limit: 10, sort: 'title', asc: 1 }
