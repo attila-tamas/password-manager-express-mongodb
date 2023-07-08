@@ -134,7 +134,7 @@ export default class UserController implements Controller {
 
 			res.clearCookie("jwt", {
 				httpOnly: true,
-				// secure: true,
+				secure: true,
 				sameSite: "none",
 			});
 
