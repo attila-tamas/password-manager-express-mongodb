@@ -5,6 +5,7 @@ import { requestEmailLimiter } from "@middlewares/rateLimiters.middleware";
 import {
 	accountActivationValidator,
 	emailValidator,
+	otpValidator,
 	passwordValidator,
 	usedEmailValidator,
 } from "@middlewares/validators.middleware";
@@ -46,7 +47,7 @@ export default class UserRoutes {
 
 		this.router.post(
 			"/api/user/change-password",
-			[emailValidator(), passwordValidator()],
+			[otpValidator(), emailValidator(), passwordValidator()],
 			errorHandler,
 			userController.changePassword
 		);
