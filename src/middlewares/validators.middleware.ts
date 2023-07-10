@@ -52,7 +52,24 @@ const passwordValidator = () =>
 		.trim()
 
 		.notEmpty()
-		.withMessage("The password must not be empty");
+		.withMessage("The password must not be empty")
+
+		.custom(async password => {
+			const hasLowercase = password.toUpperCase() != password;
+			if (!hasLowercase) throw new Error("The password must contain lowercase letters");
+
+			const hasUppercase = password.toLowerCase() != password;
+			if (!hasUppercase) throw new Error("The password must contain uppercase letters");
+
+			const hasNumber = /\d/.test(password);
+			if (!hasNumber) throw new Error("The password must contain numbers");
+
+			const hasSpecialChars = /[ `!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/.test(password);
+			if (!hasSpecialChars) throw new Error("The password must contain special characters");
+		})
+
+		.isLength({ min: 12 })
+		.withMessage("The password must be at least 12 characters");
 
 const accountActivationValidator = () => [
 	body("token")
