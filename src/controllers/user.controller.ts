@@ -1,10 +1,10 @@
 import bcrypt from "bcrypt";
 import { Request, Response } from "express";
 
-import { sender, transport } from "@config/mailService";
 import AccountActivationEmailTemplate from "@templates/accountActivationEmailTemplate";
 import PasswordChangeRequestEmailTemplate from "@templates/passwordChangeEmailTemplate";
 
+import mailService from "@config/mailService";
 import Controller from "@interfaces/controller.interface";
 import entryModel from "@models/entry.model";
 import userModel from "@models/user.model";
@@ -17,14 +17,12 @@ export default class UserController implements Controller {
 	private user;
 	private entry;
 	private userRoutes;
-	private transport;
 
 	constructor() {
 		this.userRoutes = new UserRoutes(this);
 		this.router = this.userRoutes.router;
 		this.user = userModel;
 		this.entry = entryModel;
-		this.transport = transport;
 	}
 
 	/*
@@ -39,12 +37,11 @@ export default class UserController implements Controller {
 			const secret = otp.generateSecret();
 			const token = otp.generateToken(secret);
 
-			await this.transport.send({
-				to: email,
-				from: sender,
-				subject: "Account activation",
-				html: AccountActivationEmailTemplate(token, otp.tokenMaxAgeSeconds),
-			});
+			await mailService.sendEmail(
+				email,
+				"Account activation",
+				AccountActivationEmailTemplate(token, otp.tokenMaxAgeSeconds)
+			);
 
 			return res.sendStatus(204);
 		} catch (error: any) {
@@ -84,12 +81,11 @@ export default class UserController implements Controller {
 			const secret = otp.generateSecret();
 			const token = otp.generateToken(secret);
 
-			await this.transport.send({
-				to: email,
-				from: sender,
-				subject: "Password change request",
-				html: PasswordChangeRequestEmailTemplate(token, otp.tokenMaxAgeSeconds),
-			});
+			await mailService.sendEmail(
+				email,
+				"Password change request",
+				PasswordChangeRequestEmailTemplate(token, otp.tokenMaxAgeSeconds)
+			);
 
 			return res.sendStatus(204);
 		} catch (error: any) {

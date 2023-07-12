@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 
 import "dotenv/config";
 
-import { sender, transport } from "@config/mailService";
+import mailService from "@config/mailService";
 import AccountActivationEmailTemplate from "@templates/accountActivationEmailTemplate";
 
 import Controller from "@interfaces/controller.interface";
@@ -17,13 +17,11 @@ export default class AuthenticationController implements Controller {
 
 	private user;
 	private authRoutes;
-	private transport;
 
 	constructor() {
 		this.authRoutes = new AuthenticationRoutes(this);
 		this.router = this.authRoutes.router;
 		this.user = userModel;
-		this.transport = transport;
 	}
 
 	/*
@@ -41,12 +39,11 @@ export default class AuthenticationController implements Controller {
 
 			await this.user.create({ email, password });
 
-			await this.transport.send({
-				to: email,
-				from: sender,
-				subject: "Account activation",
-				html: AccountActivationEmailTemplate(token, otp.tokenMaxAgeSeconds),
-			});
+			await mailService.sendEmail(
+				email,
+				"Account activation",
+				AccountActivationEmailTemplate(token, otp.tokenMaxAgeSeconds)
+			);
 
 			return res.status(201).json({ message: "New user registered" });
 		} catch (error: any) {
