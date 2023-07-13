@@ -31,7 +31,7 @@
 
 		/* Emit */
 		"sourceMap": true /* Create source map files for emitted JavaScript files. */,
-		"outDir": "./dist" /* Specify an output folder for all emitted files. */,
+		"outDir": "./build" /* Specify an output folder for all emitted files. */,
 		"importHelpers": true /* Allow importing helper functions from tslib once per project, instead of including them per-file. */,
 
 		/* Interop Constraints */
